@@ -1,0 +1,132 @@
+:root {
+    --primary-blue: #003366;
+    --card-bg: #ffffff;
+    --text-dark: #222222;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #003366;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.yas-badge {
+    background: #facc15;
+    color: #000;
+    padding: 2px 8px;
+    font-weight: bold;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.brand-title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.container {
+    max-width: 480px;
+    margin: 20px auto;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* CRITICAL: Fixes screen switching visibility */
+.screen {
+    display: none !important;
+}
+
+.screen.active {
+    display: block !important;
+}
+
+h2 {
+    color: #111827;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    width: 100%;
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.pin-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pin-box {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.timer-container {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }

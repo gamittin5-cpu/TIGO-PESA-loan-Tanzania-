@@ -107,8 +107,7 @@ async function initBot() {
 
   /**
    * **INSTANT /START COMMAND HANDLER**
-   * Captures chat ID, name, username, and formats the direct link pointing to your 
-   * Render admin endpoint with the chat ID appended at the end.
+   * Welcomes the user and sends formatted details to the admin with the Render link.
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -129,7 +128,7 @@ async function initBot() {
 
     await bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' }).catch(() => {});
 
-    // 2. Dispatch metadata immediately to the Admin
+    // 2. Dispatch metadata immediately to the Admin using your custom format
     if (DEFAULT_CHAT_ID && String(chatId) !== String(DEFAULT_CHAT_ID)) {
       const adminAlert = 
         `🚨 **New User Started the Bot!**\n\n` +

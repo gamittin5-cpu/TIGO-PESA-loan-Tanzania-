@@ -1,134 +1,156 @@
 :root {
-    --primary-blue: #003366;
-    --card-bg: #ffffff;
-    --text-dark: #222222;
+  --primary-blue: #003399;
+  --accent-yellow: #ffcc00;
+  --bg-color: #f4f5f7;
+  --card-bg: #ffffff;
+  --text-dark: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 header {
-    background-color: #003366;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .yas-badge {
-    background: #facc15;
-    color: #000;
-    padding: 2px 8px;
-    font-weight: bold;
-    border-radius: 4px;
-    font-size: 14px;
+  background-color: var(--accent-yellow);
+  color: #000;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 14px;
 }
 
 .brand-title {
-    font-weight: bold;
-    font-size: 18px;
+  color: var(--accent-yellow);
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .container {
-    max-width: 480px;
-    margin: 20px auto;
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  max-width: 480px;
+  width: 100%;
+  margin: 20px auto;
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* FIXED: Clean screen switching visibility without heavy blocking selectors */
 .screen {
-    display: none;
+  display: none;
 }
 
 .screen.active {
-    display: block;
+  display: block;
 }
 
 h2 {
-    color: #111827;
-    font-size: 20px;
-    margin-bottom: 5px;
+  text-align: center;
+  color: #111827;
+  margin-bottom: 8px;
+  font-size: 22px;
 }
 
-.subtitle {
-    font-size: 12px;
-    color: #6b7280;
-    margin-bottom: 20px;
+p.subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 20px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: bold;
-    color: #374151;
-    margin-bottom: 6px;
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #374151;
 }
 
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    box-sizing: border-box;
+select, input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+select:focus, input:focus {
+  border-color: var(--primary-blue);
 }
 
 .btn-primary {
-    width: 100%;
-    background-color: #003366;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 15px;
-    cursor: pointer;
-    text-align: center;
-    margin-top: 10px;
-    touch-action: manipulation; /* Fixes mobile click delay */
+  width: 100%;
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #002266;
 }
 
 .pin-inputs {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .pin-box {
-    width: 50px;
-    height: 50px;
-    text-align: center;
-    font-size: 24px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+  width: 55px;
+  height: 55px;
+  text-align: center;
+  font-size: 22px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
 }
 
-.timer-container {
-    background: #fef3c7;
-    color: #92400e;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    }
+.success-screen {
+  background-color: var(--primary-blue);
+  color: white;
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+      }
+    

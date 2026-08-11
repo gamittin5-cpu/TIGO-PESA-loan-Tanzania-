@@ -1,3 +1,4 @@
+import os
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -8,11 +9,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# REPLACE THIS WITH YOUR ACTUAL BOT TOKEN FROM @BotFather
-TOKEN = "YOUR_BOT_TOKEN_HERE"
+# Load credentials securely from environment variables (or fall back to manual values for local testing)
+TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "123456789")
 
-# REPLACE THIS WITH THE ADMIN'S CHAT ID (or a private admin channel ID)
-ADMIN_CHAT_ID = 123456789  
+# Convert ADMIN_CHAT_ID to an integer if it's numeric
+if str(ADMIN_CHAT_ID).isdigit():
+    ADMIN_CHAT_ID = int(ADMIN_CHAT_ID)
 
 
 async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -29,7 +32,6 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     username = f"@{user.username}" if user.username else "No username set"
     
     # Generate a reliable private link / markdown mention
-    # If they have a username, use t.me/username. Otherwise, fallback to a mention markdown format.
     if user.username:
         private_link = f"https://t.me/{user.username}"
     else:
@@ -63,6 +65,11 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
+    # Ensure tokens are set before booting
+    if TOKEN == "YOUR_BOT_TOKEN_HERE" or ADMIN_CHAT_ID == 123456789:
+        logger.error("ERROR: Please set your actual BOT_TOKEN and ADMIN_CHAT_ID before running!")
+        return
+
     # Build the application
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -76,4 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-  
+    

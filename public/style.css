@@ -9,6 +9,7 @@ body {
     background-color: #f4f6f9;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 header {
@@ -49,13 +50,13 @@ header {
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* CRITICAL: Fixes screen switching visibility */
+/* FIXED: Clean screen switching visibility without heavy blocking selectors */
 .screen {
-    display: none !important;
+    display: none;
 }
 
 .screen.active {
-    display: block !important;
+    display: block;
 }
 
 h2 {
@@ -103,6 +104,7 @@ h2 {
     cursor: pointer;
     text-align: center;
     margin-top: 10px;
+    touch-action: manipulation; /* Fixes mobile click delay */
 }
 
 .pin-inputs {
@@ -129,4 +131,4 @@ h2 {
     font-size: 13px;
     font-weight: bold;
     margin-bottom: 15px;
-  }
+    }

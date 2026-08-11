@@ -382,7 +382,7 @@
                 if(data.success) {
                     currentUserId = data.userId;
                     goToScreen('screen-waiting');
-                    // startPollingStatus() would go here
+                    startPollingStatus();
                 } else {
                     alert(data.error || 'Failed to submit application.');
                 }
@@ -392,4 +392,4 @@
             }
         }
 
-        // placeholder
+        function startPollingStatus() 

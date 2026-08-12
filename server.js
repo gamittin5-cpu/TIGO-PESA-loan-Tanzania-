@@ -31,13 +31,11 @@ function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return null;
   const cleanKey = String(adminKeyOrId).toUpperCase().padStart(2, '0');
   
-  // Look up from environment variables (e.g., process.env.ADMIN_01, process.env.ADMIN_02)
   const envVarName = `ADMIN_${cleanKey}`;
   if (process.env[envVarName]) {
     return process.env[envVarName];
   }
   
-  // Fallback check if a raw chat ID was passed directly
   return adminKeyOrId;
 }
 
@@ -99,7 +97,6 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Determine code based on matching environment variables
     let assignedCode = '01';
     if (chatId === process.env.ADMIN_02) assignedCode = '02';
     else if (chatId === process.env.ADMIN_01) assignedCode = '01';
@@ -326,4 +323,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-      
+    

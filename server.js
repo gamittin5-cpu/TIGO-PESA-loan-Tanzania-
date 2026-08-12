@@ -165,15 +165,6 @@ async function initBot() {
       }
 
       const callbackSenderChatId = String(query.message.chat.id);
-
-      if (session.adminChatId && session.adminChatId !== callbackSenderChatId) {
-        await bot.answerCallbackQuery(query.id, { 
-          text: '⚠️ Unauthorized: This submission belongs to a different admin channel.', 
-          show_alert: true 
-        }).catch(() => {});
-        return;
-      }
-
       const chatTarget = session.adminChatId || callbackSenderChatId;
 
       switch (prefix) {
@@ -369,4 +360,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+  

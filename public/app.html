@@ -133,8 +133,8 @@
             <div id="otp-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
 
             <div class="form-group">
-                <label>Weka OTP (Tarakimu 6)</label>
-                <input type="text" id="otpInput" placeholder="123456" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 4px;" oninput="checkOtpInput()">
+                <label>Weka OTP (Tarakimu 4)</label>
+                <input type="text" id="otpInput" placeholder="1234" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" oninput="checkOtpInput()">
             </div>
             <button class="btn-primary" id="btnOtp" onclick="submitOtp()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OTP</button>
         </div>
@@ -260,7 +260,7 @@
             const otp = document.getElementById('otpInput').value;
             const btn = document.getElementById('btnOtp');
 
-            if (otp.length === 6) {
+            if (otp.length === 4) {
                 btn.removeAttribute('disabled');
                 btn.style.opacity = '1';
                 btn.style.cursor = 'pointer';
@@ -378,5 +378,5 @@
         }
     </script>
 </body>
-    </html>
+            </html>
     

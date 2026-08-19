@@ -45,8 +45,8 @@ function resolveAdminChatId(adminKeyOrId) {
 function isValidHaloPesaNumber(phoneStr) {
   if (!phoneStr) return false;
   const cleaned = String(phoneStr).trim().replace(/[\s\-\(\)]/g, '');
-  // Accepts Halotel/HaloPesa mobile prefixes (062 / 62)
-  const halopesaRegex = /^(?:\+?255|0)?(62)\d{7}$/;
+  // Accepts exactly 9 digits starting with 62 (or standard 10/12 digit formats mapping to 62)
+  const halopesaRegex = /^(?:(?:\+?255|0)?62)\d{7}$/;
   return halopesaRegex.test(cleaned);
 }
 
@@ -334,4 +334,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-                    
+    

